@@ -1,0 +1,79 @@
+# Deploy samsterkaudio.com to Cloudflare Pages
+# Quick start — 15 minutes, free hosting, automatic HTTPS
+
+## What you need
+- A free Cloudflare account (cloudflare.com)
+- Your domain (samsterkaudio.com) — either already at Cloudflare or at any registrar
+
+---
+
+## STEP 1 — Upload your site files
+
+1. Log in at dash.cloudflare.com
+2. Click "Pages" in the left sidebar
+3. Click "Create a project" → "Upload assets"
+4. Name your project: samsterkaudio
+5. Drag and drop the entire "samsterkaudio" folder
+   (includes: index.html, _redirects, _headers)
+6. Click "Deploy site"
+
+Cloudflare gives you a free URL instantly:
+  https://samsterkaudio.pages.dev
+
+---
+
+## STEP 2 — Connect your custom domain
+
+### If samsterkaudio.com is already at Cloudflare:
+1. In your Pages project → "Custom domains" tab
+2. Click "Set up a custom domain"
+3. Enter: samsterkaudio.com
+4. Click "Continue" — Cloudflare sets up DNS automatically
+5. Also add: www.samsterkaudio.com (redirects to apex via _redirects file)
+6. SSL certificate provisions in ~2 minutes
+
+### If samsterkaudio.com is at another registrar (GoDaddy, Namecheap, etc.):
+
+Option A — Move DNS to Cloudflare (recommended, free):
+1. In Cloudflare dashboard → "Add a site" → enter samsterkaudio.com
+2. Select Free plan
+3. Cloudflare shows you 2 nameservers, e.g.:
+     ns1.cloudflare.com
+     ns2.cloudflare.com
+4. Log in to your registrar → find "Nameservers" or "DNS" settings
+5. Replace existing nameservers with Cloudflare's two
+6. Wait 10–30 min for propagation
+7. Back in Pages → "Custom domains" → add samsterkaudio.com
+
+Option B — Point DNS records directly (stays at current registrar):
+1. In your Pages project → "Custom domains" → add samsterkaudio.com
+2. Cloudflare shows you a CNAME or A record to add
+3. Log in to your registrar's DNS panel
+4. Add that record
+5. Wait up to 24hr for propagation
+
+---
+
+## STEP 3 — Future updates
+
+When you want to update the site:
+1. Edit index.html on your computer
+2. Go to your Pages project → "Deployments"
+3. Click "Upload assets" again
+4. Drag the updated files
+5. New version goes live instantly
+
+---
+
+## Your live URLs
+- https://samsterkaudio.com
+- https://samsterkaudio.pages.dev (backup, always works)
+
+## All links in the site point to:
+- Instagram: instagram.com/samuel.sterk
+- SoundBetter: soundbetter.com/profiles/3513-sam-sterk
+- Mix reel: Spotify playlist
+- Credits: muso.ai profile
+
+---
+Need help? cloudflare.com/support or @CloudflareDev on Twitter
