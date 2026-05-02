@@ -1,0 +1,2 @@
+# Redirect www to apex
+https://www.samsterkaudio.com/* https://samsterkaudio.com/:splat 301

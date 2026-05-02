@@ -1,0 +1,503 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sam Sterk Audio — Mixing Engineer, Vista CA</title>
+  <meta name="description" content="Sam Sterk Audio — Nashville-trained mixing engineer based in Vista, CA. Indie rock specialist. 20 years experience. 8.5M+ streams. Remote sessions welcome.">
+  <meta property="og:title" content="Sam Sterk Audio — Mixing Engineer">
+  <meta property="og:description" content="Nashville-trained mixing engineer. Indie rock specialist. 20 years. 8.5M+ streams. Vista, CA.">
+  <meta property="og:url" content="https://samsterkaudio.com">
+  <meta property="og:type" content="website">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:ital,wght@0,700;0,800;0,900;1,700&family=Barlow:wght@300;400&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --black: #141210;
+      --black2: #0e0d0b;
+      --grain: #3d3a30;
+      --cream: #f2ede2;
+      --orange: #c45c3a;
+      --muted: #a89f8c;
+      --border: rgba(242,237,226,0.1);
+      --disp: 'Barlow Condensed', Impact, 'Arial Narrow', sans-serif;
+      --body: 'Barlow', 'Helvetica Neue', Arial, sans-serif;
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      background: var(--black);
+      color: var(--cream);
+      font-family: var(--body);
+      font-weight: 300;
+      overflow-x: hidden;
+    }
+
+    /* ── NAV ── */
+    nav {
+      position: sticky; top: 0; z-index: 100;
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 18px 48px;
+      border-bottom: 1px solid var(--border);
+      background: rgba(20,18,16,0.96);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+    }
+    .nav-logo {
+      font-family: var(--disp); font-weight: 900; font-size: 20px;
+      text-transform: uppercase; letter-spacing: 0.06em; color: var(--cream);
+      text-decoration: none; line-height: 1;
+    }
+    .nav-logo span { color: var(--orange); }
+    .nav-links { display: flex; gap: 36px; }
+    .nav-links a {
+      font-family: var(--body); font-size: 11px; font-weight: 400;
+      letter-spacing: 0.2em; text-transform: uppercase;
+      color: var(--muted); text-decoration: none;
+      transition: color 0.2s;
+    }
+    .nav-links a:hover { color: var(--cream); }
+    .nav-cta {
+      font-family: var(--disp); font-weight: 900; font-size: 13px;
+      text-transform: uppercase; letter-spacing: 0.12em;
+      color: var(--black); background: var(--cream);
+      border: none; padding: 9px 22px; cursor: pointer;
+      text-decoration: none; display: inline-block;
+      transition: background 0.2s, color 0.2s;
+    }
+    .nav-cta:hover { background: var(--orange); color: var(--cream); }
+
+    /* ── HERO ── */
+    .hero {
+      position: relative; min-height: 90vh;
+      display: flex; flex-direction: column; justify-content: flex-end;
+      padding: 0 48px 56px;
+      overflow: hidden;
+    }
+    .hero-bg {
+      position: absolute; inset: 0;
+      background: radial-gradient(ellipse at 65% 38%, #5a4a38 0%, #3a3020 35%, #1e1a14 68%, #141210 100%);
+    }
+    .hero-overlay {
+      position: absolute; inset: 0;
+      background: linear-gradient(to bottom, rgba(20,18,16,0.15) 0%, rgba(20,18,16,0.55) 55%, rgba(20,18,16,1) 100%);
+    }
+    .hero-grain {
+      position: absolute; inset: 0; pointer-events: none;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='300' height='300' filter='url(%23n)' opacity='0.07'/%3E%3C/svg%3E");
+      opacity: 0.5; mix-blend-mode: overlay;
+    }
+    .hero-eyebrow {
+      font-family: var(--body); font-size: 11px; font-weight: 400;
+      letter-spacing: 0.3em; text-transform: uppercase; color: var(--orange);
+      margin-bottom: 18px; position: relative; z-index: 2;
+    }
+    .hero-headline {
+      font-family: var(--disp); font-weight: 900;
+      font-size: clamp(64px, 10.5vw, 112px);
+      text-transform: uppercase; line-height: 0.87;
+      letter-spacing: 0.01em; color: var(--cream);
+      position: relative; z-index: 2;
+      animation: fadeUp 0.9s cubic-bezier(0.16,1,0.3,1) both;
+    }
+    .hero-headline .accent { color: var(--orange); }
+    .hero-footer {
+      margin-top: 32px; position: relative; z-index: 2;
+      display: flex; align-items: flex-end; justify-content: space-between;
+      gap: 40px;
+    }
+    .hero-desc {
+      font-size: 15px; font-weight: 300; color: var(--muted);
+      line-height: 1.65; max-width: 400px;
+    }
+    .btn-primary {
+      font-family: var(--disp); font-weight: 900; font-size: 16px;
+      text-transform: uppercase; letter-spacing: 0.1em;
+      color: var(--black); background: var(--cream);
+      border: none; padding: 15px 36px; cursor: pointer;
+      white-space: nowrap; flex-shrink: 0;
+      text-decoration: none; display: inline-block;
+      transition: background 0.2s, color 0.2s;
+    }
+    .btn-primary:hover { background: var(--orange); color: var(--cream); }
+
+    /* ── TICKER ── */
+    .ticker {
+      border-top: 1px solid var(--border);
+      border-bottom: 1px solid var(--border);
+      padding: 15px 0; overflow: hidden;
+      background: rgba(242,237,226,0.02);
+    }
+    .ticker-track {
+      display: flex; width: max-content;
+      animation: ticker 22s linear infinite;
+    }
+    .ticker-item {
+      font-family: var(--disp); font-weight: 700; font-size: 12px;
+      text-transform: uppercase; letter-spacing: 0.22em;
+      color: var(--muted); white-space: nowrap; padding: 0 36px;
+    }
+    .ticker-item span { color: var(--orange); margin: 0 6px; }
+
+    /* ── SECTIONS ── */
+    .section { padding: 88px 48px; }
+    .section-rule {
+      display: flex; align-items: center; gap: 16px; margin-bottom: 52px;
+    }
+    .section-tag {
+      font-family: var(--body); font-size: 10px; font-weight: 400;
+      letter-spacing: 0.32em; text-transform: uppercase; color: var(--orange);
+      white-space: nowrap;
+    }
+    .rule-line { flex: 1; height: 1px; background: var(--border); }
+
+    /* ── ABOUT ── */
+    .about-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 88px; align-items: start; }
+    .about-hed {
+      font-family: var(--disp); font-weight: 900; font-size: 76px;
+      text-transform: uppercase; line-height: 0.87; color: var(--cream);
+      letter-spacing: 0.01em;
+    }
+    .about-hed .o { color: var(--orange); }
+    .about-stats {
+      display: grid; grid-template-columns: 1fr 1fr;
+      gap: 1px; margin-top: 44px;
+      background: var(--border);
+    }
+    .stat { background: var(--black); padding: 26px 22px; }
+    .stat-num {
+      font-family: var(--disp); font-weight: 900; font-size: 44px;
+      color: var(--cream); line-height: 1; letter-spacing: 0.02em;
+    }
+    .stat-label {
+      font-size: 10px; letter-spacing: 0.22em; text-transform: uppercase;
+      color: var(--muted); margin-top: 6px; font-weight: 300;
+    }
+    .about-body { font-size: 15px; font-weight: 300; color: var(--muted); line-height: 1.82; }
+    .about-body p + p { margin-top: 22px; }
+
+    /* ── SERVICES ── */
+    .services-grid {
+      display: grid; grid-template-columns: 1fr 1fr;
+      gap: 1px; background: var(--border);
+    }
+    .service-card {
+      background: var(--black); padding: 40px 32px;
+      transition: background 0.25s;
+    }
+    .service-card:hover { background: #1c1a16; }
+    .service-num {
+      font-family: var(--disp); font-weight: 900; font-size: 11px;
+      letter-spacing: 0.32em; color: var(--orange); margin-bottom: 22px;
+      text-transform: uppercase;
+    }
+    .service-name {
+      font-family: var(--disp); font-weight: 900; font-size: 48px;
+      text-transform: uppercase; line-height: 0.88; color: var(--cream);
+      letter-spacing: 0.01em; margin-bottom: 14px;
+    }
+    .service-price {
+      font-family: var(--disp); font-weight: 700; font-size: 20px;
+      color: var(--orange); letter-spacing: 0.06em; margin-bottom: 18px;
+      text-transform: uppercase;
+    }
+    .service-desc {
+      font-size: 13px; font-weight: 300; color: var(--muted); line-height: 1.75;
+    }
+
+    /* ── CREDITS ── */
+    .credits-section { background: var(--black2); padding: 88px 48px; }
+    .credits-hed {
+      font-family: var(--disp); font-weight: 900; font-size: 84px;
+      text-transform: uppercase; line-height: 0.87; color: var(--cream);
+      letter-spacing: 0.01em; margin-bottom: 52px;
+    }
+    .credits-hed .o { color: var(--orange); }
+    .credits-grid {
+      display: grid; grid-template-columns: repeat(3, 1fr);
+      border-top: 1px solid var(--border);
+    }
+    .credit-item {
+      padding: 22px 0 22px 0; padding-right: 24px;
+      border-bottom: 1px solid var(--border);
+    }
+    .credit-name {
+      font-family: var(--disp); font-weight: 700; font-size: 20px;
+      text-transform: uppercase; color: var(--cream); letter-spacing: 0.04em;
+    }
+    .credit-role {
+      font-size: 10px; letter-spacing: 0.2em; text-transform: uppercase;
+      color: var(--muted); margin-top: 5px; font-weight: 300;
+    }
+
+    /* ── REVIEWS ── */
+    .review-grid {
+      display: grid; grid-template-columns: 1fr 1fr;
+      gap: 1px; background: var(--border);
+    }
+    .review-card { background: var(--black); padding: 40px 36px; }
+    .review-quote {
+      font-family: var(--disp); font-weight: 700; font-style: italic;
+      font-size: 24px; line-height: 1.18; color: var(--cream);
+      letter-spacing: 0.01em; margin-bottom: 24px;
+    }
+    .review-author {
+      font-size: 10px; letter-spacing: 0.24em; text-transform: uppercase;
+      color: var(--orange); font-weight: 400;
+    }
+
+    /* ── CTA ── */
+    .cta-section {
+      padding: 112px 48px; text-align: center;
+      border-top: 1px solid var(--border);
+      position: relative; overflow: hidden;
+    }
+    .cta-glow {
+      position: absolute; inset: 0; pointer-events: none;
+      background: radial-gradient(ellipse at 50% 110%, rgba(196,92,58,0.14) 0%, transparent 65%);
+    }
+    .cta-hed {
+      font-family: var(--disp); font-weight: 900;
+      font-size: clamp(60px, 9vw, 100px);
+      text-transform: uppercase; line-height: 0.87;
+      color: var(--cream); letter-spacing: 0.01em;
+      position: relative; z-index: 1; margin-bottom: 28px;
+    }
+    .cta-hed .o { color: var(--orange); }
+    .cta-sub {
+      font-size: 13px; font-weight: 300; color: var(--muted);
+      letter-spacing: 0.18em; text-transform: uppercase;
+      margin-bottom: 44px; position: relative; z-index: 1;
+    }
+    .btn-large {
+      font-family: var(--disp); font-weight: 900; font-size: 22px;
+      text-transform: uppercase; letter-spacing: 0.1em;
+      color: var(--black); background: var(--cream);
+      border: none; padding: 20px 56px; cursor: pointer;
+      position: relative; z-index: 1;
+      text-decoration: none; display: inline-block;
+      transition: background 0.2s, color 0.2s;
+    }
+    .btn-large:hover { background: var(--orange); color: var(--cream); }
+
+    /* ── FOOTER ── */
+    footer {
+      padding: 28px 48px;
+      border-top: 1px solid var(--border);
+      display: flex; align-items: center; justify-content: space-between;
+      flex-wrap: wrap; gap: 16px;
+    }
+    .footer-logo {
+      font-family: var(--disp); font-weight: 900; font-size: 16px;
+      text-transform: uppercase; letter-spacing: 0.08em; color: var(--muted);
+    }
+    .footer-logo span { color: var(--orange); }
+    .footer-links { display: flex; gap: 28px; }
+    .footer-links a {
+      font-size: 10px; letter-spacing: 0.2em; text-transform: uppercase;
+      color: var(--muted); text-decoration: none; font-weight: 300;
+      transition: color 0.2s;
+    }
+    .footer-links a:hover { color: var(--cream); }
+    .footer-copy { font-size: 10px; color: var(--grain); letter-spacing: 0.1em; }
+
+    /* ── ANIMATIONS ── */
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(28px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes ticker {
+      from { transform: translateX(0); }
+      to   { transform: translateX(-50%); }
+    }
+
+    /* ── MOBILE ── */
+    @media (max-width: 768px) {
+      nav { padding: 16px 24px; }
+      .nav-links { display: none; }
+      .hero { padding: 0 24px 44px; min-height: 85vh; }
+      .hero-footer { flex-direction: column; align-items: flex-start; }
+      .section { padding: 64px 24px; }
+      .about-grid { grid-template-columns: 1fr; gap: 48px; }
+      .about-hed { font-size: 56px; }
+      .services-grid { grid-template-columns: 1fr; }
+      .credits-grid { grid-template-columns: 1fr 1fr; }
+      .credits-hed { font-size: 56px; }
+      .review-grid { grid-template-columns: 1fr; }
+      .cta-section { padding: 80px 24px; }
+      footer { padding: 24px; flex-direction: column; align-items: flex-start; }
+      .credits-section { padding: 64px 24px; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- NAV -->
+  <nav>
+    <a href="#" class="nav-logo">Sam Sterk<span> Audio</span></a>
+    <div class="nav-links">
+      <a href="#about">About</a>
+      <a href="#services">Services</a>
+      <a href="#credits">Credits</a>
+      <a href="https://open.spotify.com/playlist/2DdlPsXatgkaBtTelERZ1V" target="_blank" rel="noopener">Mix reel</a>
+    </div>
+    <a href="https://soundbetter.com/profiles/3513-sam-sterk" target="_blank" rel="noopener" class="nav-cta">Start a project</a>
+  </nav>
+
+  <!-- HERO -->
+  <section class="hero">
+    <div class="hero-bg"></div>
+    <div class="hero-overlay"></div>
+    <div class="hero-grain"></div>
+    <p class="hero-eyebrow">Mixing engineer · Vista, CA · Nashville trained</p>
+    <h1 class="hero-headline">
+      Mixes that<br>sound like<br><span class="accent">a record.</span>
+    </h1>
+    <div class="hero-footer">
+      <p class="hero-desc">Indie rock specialist. 20 years experience. 8.5 million streams. Send me something you're proud of.</p>
+      <a href="https://soundbetter.com/profiles/3513-sam-sterk" target="_blank" rel="noopener" class="btn-primary">Send me your project →</a>
+    </div>
+  </section>
+
+  <!-- TICKER -->
+  <div class="ticker" aria-hidden="true">
+    <div class="ticker-track">
+      <div class="ticker-item">Mixing<span>·</span></div>
+      <div class="ticker-item">Mastering<span>·</span></div>
+      <div class="ticker-item">Indie Rock<span>·</span></div>
+      <div class="ticker-item">Vista CA<span>·</span></div>
+      <div class="ticker-item">Nashville Trained<span>·</span></div>
+      <div class="ticker-item">8.5M Streams<span>·</span></div>
+      <div class="ticker-item">20 Years<span>·</span></div>
+      <div class="ticker-item">Remote Sessions Welcome<span>·</span></div>
+      <div class="ticker-item">samsterkaudio.com<span>·</span></div>
+      <div class="ticker-item">Mixing<span>·</span></div>
+      <div class="ticker-item">Mastering<span>·</span></div>
+      <div class="ticker-item">Indie Rock<span>·</span></div>
+      <div class="ticker-item">Vista CA<span>·</span></div>
+      <div class="ticker-item">Nashville Trained<span>·</span></div>
+      <div class="ticker-item">8.5M Streams<span>·</span></div>
+      <div class="ticker-item">20 Years<span>·</span></div>
+      <div class="ticker-item">Remote Sessions Welcome<span>·</span></div>
+      <div class="ticker-item">samsterkaudio.com<span>·</span></div>
+    </div>
+  </div>
+
+  <!-- ABOUT -->
+  <section class="section" id="about">
+    <div class="section-rule">
+      <div class="section-tag">About</div>
+      <div class="rule-line"></div>
+    </div>
+    <div class="about-grid">
+      <div>
+        <div class="about-hed">I make<br>records<br><span class="o">sound<br>right.</span></div>
+        <div class="about-stats">
+          <div class="stat"><div class="stat-num">20+</div><div class="stat-label">Years in audio</div></div>
+          <div class="stat"><div class="stat-num">8.5M</div><div class="stat-label">Global streams</div></div>
+          <div class="stat"><div class="stat-num">5★</div><div class="stat-label">SoundBetter rating</div></div>
+          <div class="stat"><div class="stat-num">CA</div><div class="stat-label">Vista · San Diego</div></div>
+        </div>
+      </div>
+      <div class="about-body">
+        <p>I got into this because of records — the ones that feel alive, that sound like a room, like something real happened. Trained in Nashville. Moved back to California. Spent twenty years in studios chasing that feeling on every project that comes through the door.</p>
+        <p>Indie rock is my home. All the directions it goes — loud and abrasive, quiet and strange, direct and anthemic. I'll meet your music where it is.</p>
+        <p>My clients say my mixes are dynamic, distinctive, and capturing. I think that just means I listen.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- SERVICES -->
+  <section class="section" id="services" style="padding-top: 0;">
+    <div class="section-rule">
+      <div class="section-tag">Services</div>
+      <div class="rule-line"></div>
+    </div>
+    <div class="services-grid">
+      <div class="service-card">
+        <div class="service-num">01</div>
+        <div class="service-name">Mixing</div>
+        <div class="service-price">$400 / song</div>
+        <div class="service-desc">Send consolidated WAVs and a rough mix. One-week turnaround. 3–5 revisions included. I'll make it hit harder than you expected.</div>
+      </div>
+      <div class="service-card">
+        <div class="service-num">02</div>
+        <div class="service-name">Mastering</div>
+        <div class="service-price">$75 / song</div>
+        <div class="service-desc">Final polish for distribution. Clarity, loudness, and translation across every system — streaming, vinyl, everything.</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- CREDITS -->
+  <section class="credits-section" id="credits">
+    <div class="section-rule">
+      <div class="section-tag">Credits</div>
+      <div class="rule-line" style="background: rgba(242,237,226,0.08);"></div>
+    </div>
+    <div class="credits-hed">Recent<br><span class="o">work.</span></div>
+    <div class="credits-grid">
+      <div class="credit-item"><div class="credit-name">Beach Chapel</div><div class="credit-role">Mixing · Jerusalem</div></div>
+      <div class="credit-item"><div class="credit-name">Kadri Williams</div><div class="credit-role">Mixing · Engineer</div></div>
+      <div class="credit-item"><div class="credit-name">Nonpronto</div><div class="credit-role">Mixing · Engineer</div></div>
+      <div class="credit-item"><div class="credit-name">Township</div><div class="credit-role">Mixing · Engineer</div></div>
+      <div class="credit-item"><div class="credit-name">The Washups</div><div class="credit-role">Mixing · Engineer</div></div>
+      <div class="credit-item"><div class="credit-name">Weathered</div><div class="credit-role">Mixing · Engineer</div></div>
+      <div class="credit-item"><div class="credit-name">Victus</div><div class="credit-role">Mixing · Engineer</div></div>
+      <div class="credit-item"><div class="credit-name">Brian McMaster</div><div class="credit-role">Mixing · Engineer</div></div>
+      <div class="credit-item"><div class="credit-name">Hopeful.</div><div class="credit-role">Mixing · Engineer</div></div>
+    </div>
+  </section>
+
+  <!-- REVIEWS -->
+  <section class="section">
+    <div class="section-rule">
+      <div class="section-tag">What people say</div>
+      <div class="rule-line"></div>
+    </div>
+    <div class="review-grid">
+      <div class="review-card">
+        <div class="review-quote">"His mixes hold depth and bring out the best parts of a recording."</div>
+        <div class="review-author">Brian McMaster</div>
+      </div>
+      <div class="review-card">
+        <div class="review-quote">"Great ears, great gear, great attitude. His mixes brought our record to life."</div>
+        <div class="review-author">Josh Murtha</div>
+      </div>
+      <div class="review-card">
+        <div class="review-quote">"Very prompt in the delivery of each iteration — the guy knows his stuff."</div>
+        <div class="review-author">Nonpronto</div>
+      </div>
+      <div class="review-card">
+        <div class="review-quote">"A great ear for quality — he will elevate your music to the next level."</div>
+        <div class="review-author">Insignificant Figures</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- CTA -->
+  <section class="cta-section">
+    <div class="cta-glow"></div>
+    <div class="cta-hed">Ready to<br>make a<br><span class="o">record?</span></div>
+    <p class="cta-sub">samsterkaudio.com · Vista, CA · Remote sessions welcome</p>
+    <a href="https://soundbetter.com/profiles/3513-sam-sterk" target="_blank" rel="noopener" class="btn-large">Send me your project →</a>
+  </section>
+
+  <!-- FOOTER -->
+  <footer>
+    <div class="footer-logo">Sam Sterk<span> Audio</span></div>
+    <div class="footer-links">
+      <a href="https://www.instagram.com/samuel.sterk/" target="_blank" rel="noopener">Instagram</a>
+      <a href="https://soundbetter.com/profiles/3513-sam-sterk" target="_blank" rel="noopener">SoundBetter</a>
+      <a href="https://open.spotify.com/playlist/2DdlPsXatgkaBtTelERZ1V" target="_blank" rel="noopener">Mix reel</a>
+      <a href="https://credits.muso.ai/profile/592690dd-3ef4-49d0-8706-8df462789fef" target="_blank" rel="noopener">Credits</a>
+    </div>
+    <div class="footer-copy">© 2026 samsterkaudio.com</div>
+  </footer>
+
+</body>
+</html>
