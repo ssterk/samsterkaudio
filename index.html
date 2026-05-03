@@ -348,6 +348,32 @@
       border: 1px solid rgba(242,237,226,0.2); color: var(--muted);
     }
 
+    /* ── SOCIAL ROW ── */
+    .social-row {
+      border-top: 1px solid var(--border);
+      padding: 48px;
+      display: flex; align-items: center; gap: 48px;
+      flex-wrap: wrap;
+    }
+    .social-row-label {
+      font-size: 10px; font-weight: 400; letter-spacing: 0.32em;
+      text-transform: uppercase; color: var(--orange);
+      white-space: nowrap;
+    }
+    .social-links { display: flex; gap: 0; flex-wrap: wrap; }
+    .social-link {
+      font-family: var(--disp); font-weight: 900; font-size: 22px;
+      text-transform: uppercase; letter-spacing: 0.04em;
+      color: var(--cream); text-decoration: none;
+      padding: 10px 28px 10px 0;
+      border-right: 1px solid var(--border);
+      margin-right: 28px;
+      transition: color 0.2s;
+      line-height: 1;
+    }
+    .social-link:last-child { border-right: none; margin-right: 0; }
+    .social-link:hover { color: var(--orange); }
+
     /* ── FOOTER ── */
     footer {
       padding: 28px 48px;
@@ -396,6 +422,8 @@
       .cta-section { padding: 80px 24px 64px; }
       .form-grid { grid-template-columns: 1fr; }
       .form-group.full { grid-column: 1; }
+      .social-row { padding: 36px 24px; gap: 24px; }
+      .social-link { font-size: 18px; }
       footer { padding: 24px; flex-direction: column; align-items: flex-start; }
       .credits-section { padding: 64px 24px; }
     }
@@ -669,6 +697,17 @@
       <div class="form-feedback" id="form-feedback"></div>
     </form>
   </section>
+
+  <!-- SOCIAL ROW -->
+  <div class="social-row">
+    <span class="social-row-label">Find me on</span>
+    <div class="social-links">
+      <a href="https://www.instagram.com/samuel.sterk/" target="_blank" rel="noopener" class="social-link">Instagram</a>
+      <a href="https://open.spotify.com/playlist/2DdlPsXatgkaBtTelERZ1V?si=42e6ff372cc44885" target="_blank" rel="noopener" class="social-link">Spotify</a>
+      <a href="https://credits.muso.ai/profile/592690dd-3ef4-49d0-8706-8df462789fef" target="_blank" rel="noopener" class="social-link">Muso.ai</a>
+      <a href="https://soundbetter.com/profiles/3513-sam-sterk" target="_blank" rel="noopener" class="social-link">SoundBetter</a>
+    </div>
+  </div>
 
   <!-- FOOTER -->
   <footer>
