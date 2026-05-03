@@ -262,7 +262,7 @@
 
     /* ── CTA ── */
     .cta-section {
-      padding: 112px 48px; text-align: center;
+      padding: 112px 48px 96px;
       border-top: 1px solid var(--border);
       position: relative; overflow: hidden;
     }
@@ -281,18 +281,72 @@
     .cta-sub {
       font-size: 13px; font-weight: 300; color: var(--muted);
       letter-spacing: 0.18em; text-transform: uppercase;
-      margin-bottom: 44px; position: relative; z-index: 1;
+      margin-bottom: 56px; position: relative; z-index: 1;
     }
-    .btn-large {
-      font-family: var(--disp); font-weight: 900; font-size: 22px;
+
+    /* ── FORM ── */
+    .project-form {
+      position: relative; z-index: 1;
+      max-width: 860px; margin: 0 auto; text-align: left;
+    }
+    .form-grid {
+      display: grid; grid-template-columns: 1fr 1fr; gap: 16px;
+      margin-bottom: 16px;
+    }
+    .form-group { display: flex; flex-direction: column; gap: 8px; }
+    .form-group.full { grid-column: 1 / -1; }
+    .form-group label {
+      font-size: 10px; font-weight: 400; letter-spacing: 0.22em;
+      text-transform: uppercase; color: var(--muted);
+    }
+    .form-group input,
+    .form-group select,
+    .form-group textarea {
+      background: rgba(242,237,226,0.04);
+      border: 1px solid rgba(242,237,226,0.18);
+      color: var(--cream);
+      font-family: var(--body); font-size: 14px; font-weight: 300;
+      padding: 13px 16px;
+      outline: none;
+      transition: border-color 0.2s;
+      width: 100%;
+      appearance: none; -webkit-appearance: none;
+    }
+    .form-group select {
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%23a89f8c' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: right 14px center;
+      padding-right: 40px;
+      cursor: pointer;
+    }
+    .form-group select option { background: #1c1a16; color: var(--cream); }
+    .form-group textarea { resize: vertical; min-height: 120px; }
+    .form-group input:focus,
+    .form-group select:focus,
+    .form-group textarea:focus { border-color: var(--orange); }
+    .form-group input::placeholder,
+    .form-group textarea::placeholder { color: rgba(168,159,140,0.45); }
+    .btn-submit {
+      font-family: var(--disp); font-weight: 900; font-size: 18px;
       text-transform: uppercase; letter-spacing: 0.1em;
       color: var(--black); background: var(--cream);
-      border: none; padding: 20px 56px; cursor: pointer;
-      position: relative; z-index: 1;
-      text-decoration: none; display: inline-block;
+      border: none; padding: 17px 48px; cursor: pointer;
+      margin-top: 24px; display: block; width: 100%;
       transition: background 0.2s, color 0.2s;
     }
-    .btn-large:hover { background: var(--orange); color: var(--cream); }
+    .btn-submit:hover { background: var(--orange); color: var(--cream); }
+    .btn-submit:disabled { opacity: 0.6; cursor: not-allowed; }
+    .form-feedback {
+      display: none; margin-top: 32px; padding: 20px 24px;
+      font-size: 13px; letter-spacing: 0.1em; text-transform: uppercase;
+      font-weight: 400; text-align: center;
+    }
+    .form-feedback.success {
+      border: 1px solid rgba(196,92,58,0.4); color: var(--orange);
+    }
+    .form-feedback.error {
+      border: 1px solid rgba(242,237,226,0.2); color: var(--muted);
+    }
 
     /* ── FOOTER ── */
     footer {
@@ -339,7 +393,9 @@
       .credits-grid { grid-template-columns: 1fr 1fr; }
       .credits-hed { font-size: 56px; }
       .review-grid { grid-template-columns: 1fr; }
-      .cta-section { padding: 80px 24px; }
+      .cta-section { padding: 80px 24px 64px; }
+      .form-grid { grid-template-columns: 1fr; }
+      .form-group.full { grid-column: 1; }
       footer { padding: 24px; flex-direction: column; align-items: flex-start; }
       .credits-section { padding: 64px 24px; }
     }
@@ -356,7 +412,7 @@
       <a href="#credits">Credits</a>
       <a href="#mix-reel">Mix reel</a>
     </div>
-    <a href="https://soundbetter.com/profiles/3513-sam-sterk" target="_blank" rel="noopener" class="nav-cta">Start a project</a>
+    <a href="#contact" class="nav-cta">Start a project</a>
   </nav>
 
   <!-- HERO -->
@@ -540,12 +596,78 @@
     </iframe>
   </section>
 
-  <!-- CTA -->
-  <section class="cta-section">
+  <!-- CONTACT -->
+  <section class="cta-section" id="contact">
     <div class="cta-glow"></div>
     <div class="cta-hed">Ready to<br>make a<br><span class="o">record?</span></div>
     <p class="cta-sub">samsterkaudio.com · Vista, CA · Remote sessions welcome</p>
-    <a href="https://soundbetter.com/profiles/3513-sam-sterk" target="_blank" rel="noopener" class="btn-large">Send me your project →</a>
+
+    <form class="project-form" id="project-form" novalidate>
+      <input type="hidden" name="access_key" value="fa5c3d6a-14c5-4bec-8af2-6c8e9dc54d9a">
+      <input type="hidden" name="subject" value="New project inquiry — samsterkaudio.com">
+      <input type="checkbox" name="botcheck" style="display:none;" tabindex="-1" autocomplete="off">
+
+      <div class="form-grid">
+        <div class="form-group">
+          <label for="f-name">Your Name</label>
+          <input type="text" id="f-name" name="name" placeholder="First Last" required>
+        </div>
+        <div class="form-group">
+          <label for="f-email">Email Address</label>
+          <input type="email" id="f-email" name="email" placeholder="you@example.com" required>
+        </div>
+        <div class="form-group">
+          <label for="f-artist">Artist / Band Name</label>
+          <input type="text" id="f-artist" name="artist" placeholder="As it appears on streaming" required>
+        </div>
+        <div class="form-group">
+          <label for="f-service">Service Needed</label>
+          <select id="f-service" name="service" required>
+            <option value="" disabled selected>Select a service</option>
+            <option>Mixing — $400 / song</option>
+            <option>Mastering — $80 / song</option>
+            <option>Editing — $150 / track</option>
+            <option>Time Alignment — $100 / track</option>
+            <option>Vocal Comping — $100 / track</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label for="f-songs">Number of Songs</label>
+          <select id="f-songs" name="songs">
+            <option value="" disabled selected>How many?</option>
+            <option>1</option>
+            <option>2–3</option>
+            <option>4–6</option>
+            <option>7+</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label for="f-genre">Genre</label>
+          <input type="text" id="f-genre" name="genre" placeholder="e.g. indie rock, alt country">
+        </div>
+        <div class="form-group full">
+          <label for="f-refs">Reference Tracks</label>
+          <input type="text" id="f-refs" name="references" placeholder="2–3 songs that capture the sound you're after">
+        </div>
+        <div class="form-group">
+          <label for="f-turnaround">Turnaround</label>
+          <select id="f-turnaround" name="turnaround">
+            <option value="" disabled selected>When do you need it?</option>
+            <option>ASAP</option>
+            <option>1–2 weeks</option>
+            <option>~1 month</option>
+            <option>No rush</option>
+          </select>
+        </div>
+        <div class="form-group full">
+          <label for="f-message">Tell me about your project</label>
+          <textarea id="f-message" name="message" placeholder="Vibe, vision, what matters to you — anything that helps me understand what you're going for."></textarea>
+        </div>
+      </div>
+
+      <button type="submit" class="btn-submit">Send my project →</button>
+      <div class="form-feedback" id="form-feedback"></div>
+    </form>
   </section>
 
   <!-- FOOTER -->
@@ -560,5 +682,43 @@
     <div class="footer-copy">© 2026 samsterkaudio.com</div>
   </footer>
 
+  <script>
+    const form = document.getElementById('project-form');
+    const feedback = document.getElementById('form-feedback');
+    const btn = form.querySelector('.btn-submit');
+
+    form.addEventListener('submit', async function(e) {
+      e.preventDefault();
+      btn.disabled = true;
+      btn.textContent = 'Sending…';
+      feedback.style.display = 'none';
+
+      const data = Object.fromEntries(new FormData(form));
+
+      try {
+        const res = await fetch('https://api.web3forms.com/submit', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+          body: JSON.stringify(data)
+        });
+        const json = await res.json();
+        if (res.ok && json.success) {
+          form.querySelectorAll('input:not([type=hidden]):not([type=checkbox]), select, textarea').forEach(el => el.value = '');
+          feedback.className = 'form-feedback success';
+          feedback.textContent = 'Got it. I\'ll be in touch soon.';
+          feedback.style.display = 'block';
+          btn.textContent = 'Sent ✓';
+        } else {
+          throw new Error(json.message || 'Submission failed');
+        }
+      } catch(err) {
+        feedback.className = 'form-feedback error';
+        feedback.textContent = 'Something went wrong — try emailing directly at ssterk@gmail.com';
+        feedback.style.display = 'block';
+        btn.disabled = false;
+        btn.textContent = 'Send my project →';
+      }
+    });
+  </script>
 </body>
 </html>
