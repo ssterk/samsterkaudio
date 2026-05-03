@@ -3,19 +3,23 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Sam Sterk Audio | Mixing Engineer — Vista, CA</title>
-  <meta name="description" content="Nashville-trained mixing engineer based in Vista, CA. Rock, folk, worship, pop, and beyond — 20 years experience and 10M+ streams. Mixing from $400/song. Remote sessions welcome.">
+  <title>Sam Sterk Audio | Mixing & Mastering Engineer — Vista, CA</title>
+  <meta name="description" content="Nashville-trained mixing & mastering engineer in Vista, CA (San Diego area). Rock, folk, worship, pop, and beyond. 20 years · 10M+ streams · Remote sessions welcome.">
   <meta name="author" content="Sam Sterk">
   <meta name="theme-color" content="#141210">
   <link rel="canonical" href="https://samsterkaudio.com/">
+  <meta name="geo.region" content="US-CA">
+  <meta name="geo.placename" content="Vista, California">
+  <meta name="geo.position" content="33.1953;-117.2425">
+  <meta name="ICBM" content="33.1953, -117.2425">
 
   <!-- Open Graph -->
   <meta property="og:type" content="website">
   <meta property="og:site_name" content="Sam Sterk Audio">
   <meta property="og:locale" content="en_US">
   <meta property="og:url" content="https://samsterkaudio.com/">
-  <meta property="og:title" content="Sam Sterk Audio | Mixing Engineer — Vista, CA">
-  <meta property="og:description" content="Nashville-trained mixing engineer. Rock, folk, worship, pop, and beyond. 20 years. 10M+ streams. Mixing from $400/song. Remote sessions welcome.">
+  <meta property="og:title" content="Sam Sterk Audio | Mixing & Mastering Engineer — Vista, CA">
+  <meta property="og:description" content="Nashville-trained mixing & mastering engineer. Vista, CA · San Diego area. Rock, folk, worship, pop, and beyond. 20 years. 10M+ streams. Remote sessions welcome.">
   <meta property="og:image" content="https://samsterkaudio.com/images/og.jpg">
   <meta property="og:image:width" content="1200">
   <meta property="og:image:height" content="630">
@@ -24,8 +28,8 @@
   <!-- Twitter / X Card -->
   <meta name="twitter:card" content="summary_large_image">
   <meta name="twitter:site" content="@ssterk">
-  <meta name="twitter:title" content="Sam Sterk Audio | Mixing Engineer — Vista, CA">
-  <meta name="twitter:description" content="Nashville-trained mixing engineer. Rock, folk, worship, pop, and beyond. 20 years. 10M+ streams. Remote sessions welcome.">
+  <meta name="twitter:title" content="Sam Sterk Audio | Mixing & Mastering Engineer — Vista, CA">
+  <meta name="twitter:description" content="Nashville-trained mixing & mastering engineer. Vista, CA · San Diego area. Rock, folk, worship, pop, and beyond. 20 years. 10M+ streams. Remote sessions welcome.">
   <meta name="twitter:image" content="https://samsterkaudio.com/images/og.jpg">
 
   <!-- Structured Data -->
@@ -34,17 +38,19 @@
     "@context": "https://schema.org",
     "@graph": [
       {
-        "@type": "ProfessionalService",
+        "@type": ["ProfessionalService", "LocalBusiness"],
         "@id": "https://samsterkaudio.com/#business",
         "name": "Sam Sterk Audio",
-        "description": "Nashville-trained mixing engineer based in Vista, CA. Rock, folk, worship, pop, and beyond — 20 years experience and 10M+ streams. Remote sessions welcome.",
+        "description": "Nashville-trained mixing and mastering engineer based in Vista, CA (San Diego area). Specializing in rock, folk, worship, pop, and beyond — 20 years experience, 10M+ streams, remote sessions welcome.",
         "url": "https://samsterkaudio.com/",
         "image": "https://samsterkaudio.com/images/og.jpg",
         "priceRange": "$$",
+        "email": "ssterk@gmail.com",
         "address": {
           "@type": "PostalAddress",
           "addressLocality": "Vista",
           "addressRegion": "CA",
+          "postalCode": "92081",
           "addressCountry": "US"
         },
         "geo": {
@@ -52,37 +58,39 @@
           "latitude": 33.1953,
           "longitude": -117.2425
         },
-        "areaServed": {
-          "@type": "Country",
-          "name": "United States"
-        },
+        "areaServed": [
+          {"@type": "City", "name": "Vista"},
+          {"@type": "AdministrativeArea", "name": "San Diego County"},
+          {"@type": "State", "name": "California"},
+          {"@type": "Country", "name": "United States"}
+        ],
         "hasOfferCatalog": {
           "@type": "OfferCatalog",
           "name": "Audio Engineering Services",
           "itemListElement": [
             {
               "@type": "Offer",
-              "itemOffered": {"@type": "Service", "name": "Mixing", "description": "Professional mixing, one-week turnaround, 4 revisions included"},
+              "itemOffered": {"@type": "Service", "name": "Audio Mixing", "description": "Remote audio mixing with one-week turnaround and 4 revisions included. Rock, folk, worship, pop, and beyond."},
               "price": "400", "priceCurrency": "USD"
             },
             {
               "@type": "Offer",
-              "itemOffered": {"@type": "Service", "name": "Mastering", "description": "Final polish for streaming and distribution"},
+              "itemOffered": {"@type": "Service", "name": "Audio Mastering", "description": "Final mastering for streaming and digital distribution. Clarity, loudness, and translation across every platform."},
               "price": "80", "priceCurrency": "USD"
             },
             {
               "@type": "Offer",
-              "itemOffered": {"@type": "Service", "name": "Editing"},
+              "itemOffered": {"@type": "Service", "name": "Audio Editing", "description": "Transparent editing that preserves the feel of the performance."},
               "price": "150", "priceCurrency": "USD"
             },
             {
               "@type": "Offer",
-              "itemOffered": {"@type": "Service", "name": "Time Alignment"},
+              "itemOffered": {"@type": "Service", "name": "Time Alignment", "description": "Phase-coherent drum and instrument alignment for a tight, locked mix."},
               "price": "100", "priceCurrency": "USD"
             },
             {
               "@type": "Offer",
-              "itemOffered": {"@type": "Service", "name": "Vocal Comping"},
+              "itemOffered": {"@type": "Service", "name": "Vocal Comping", "description": "Building a seamless vocal composite from multiple takes."},
               "price": "100", "priceCurrency": "USD"
             }
           ]
@@ -97,11 +105,13 @@
         "@type": "Person",
         "@id": "https://samsterkaudio.com/#person",
         "name": "Sam Sterk",
-        "jobTitle": "Mixing Engineer",
+        "jobTitle": "Mixing & Mastering Engineer",
+        "description": "Nashville-trained mixing and mastering engineer with 20+ years experience. Based in Vista, CA (San Diego area). Works remotely with artists across the US.",
         "url": "https://samsterkaudio.com/",
         "image": "https://samsterkaudio.com/images/og.jpg",
         "worksFor": {"@id": "https://samsterkaudio.com/#business"},
-        "knowsAbout": ["Audio Mixing", "Mastering", "Rock", "Folk", "Worship", "Pop", "Music Production", "Recording Engineering"],
+        "homeLocation": {"@type": "Place", "name": "Vista, California"},
+        "knowsAbout": ["Audio Mixing", "Audio Mastering", "Rock", "Folk", "Worship", "Pop", "Singer-Songwriter", "Music Production", "Recording Engineering", "Remote Recording"],
         "sameAs": [
           "https://soundbetter.com/profiles/3513-sam-sterk",
           "https://www.instagram.com/samuel.sterk/"
