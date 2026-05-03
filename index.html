@@ -161,6 +161,8 @@
 
     /* ── ABOUT ── */
     .about-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 88px; align-items: start; }
+    .about-photo { margin-bottom: 36px; overflow: hidden; aspect-ratio: 16/9; }
+    .about-photo img { width: 100%; height: 100%; object-fit: cover; object-position: center top; display: block; }
     .about-hed {
       font-family: var(--disp); font-weight: 900; font-size: 76px;
       text-transform: uppercase; line-height: 0.87; color: var(--cream);
@@ -183,6 +185,10 @@
     }
     .about-body { font-size: 15px; font-weight: 300; color: var(--muted); line-height: 1.82; }
     .about-body p + p { margin-top: 22px; }
+
+    /* ── STUDIO STRIP ── */
+    .studio-strip { width: 100%; height: 380px; overflow: hidden; }
+    .studio-strip img { width: 100%; height: 100%; object-fit: cover; object-position: center 35%; display: block; opacity: 0.9; }
 
     /* ── SERVICES ── */
     .services-grid {
@@ -328,6 +334,7 @@
       .section { padding: 64px 24px; }
       .about-grid { grid-template-columns: 1fr; gap: 48px; }
       .about-hed { font-size: 56px; }
+      .studio-strip { height: 240px; }
       .services-grid { grid-template-columns: 1fr; }
       .credits-grid { grid-template-columns: 1fr 1fr; }
       .credits-hed { font-size: 56px; }
@@ -404,6 +411,9 @@
     </div>
     <div class="about-grid">
       <div>
+        <div class="about-photo">
+          <img src="images/about.webp" alt="Sam Sterk at work in the studio" loading="lazy">
+        </div>
         <div class="about-hed">I make<br>records<br><span class="o">sound<br>right.</span></div>
         <div class="about-stats">
           <div class="stat"><div class="stat-num">20+</div><div class="stat-label">Years in audio</div></div>
@@ -441,6 +451,11 @@
       </div>
     </div>
   </section>
+
+  <!-- STUDIO STRIP -->
+  <div class="studio-strip">
+    <img src="images/studio-bw.webp" alt="Mixing console in the studio" loading="lazy">
+  </div>
 
   <!-- CREDITS -->
   <section class="credits-section" id="credits">
