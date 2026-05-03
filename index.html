@@ -321,6 +321,30 @@
       font-size: 13px; font-weight: 300; color: var(--muted); line-height: 1.75;
     }
 
+    /* ── GEAR ── */
+    .gear-layout { display: grid; grid-template-columns: 1fr 1.6fr; gap: 88px; align-items: start; }
+    .gear-hed {
+      font-family: var(--disp); font-weight: 900; font-size: 72px;
+      text-transform: uppercase; line-height: 0.87; color: var(--cream);
+      letter-spacing: 0.01em; position: sticky; top: 80px;
+    }
+    .gear-hed .o { color: var(--orange); }
+    .gear-list-col { display: flex; flex-direction: column; }
+    .gear-category { border-top: 1px solid var(--border); padding: 28px 0; }
+    .gear-category:last-child { border-bottom: 1px solid var(--border); }
+    .gear-cat-label {
+      font-size: 10px; font-weight: 400; letter-spacing: 0.32em;
+      text-transform: uppercase; color: var(--orange); margin-bottom: 18px;
+    }
+    .gear-items { list-style: none; display: flex; flex-direction: column; gap: 14px; }
+    .gear-item { display: flex; justify-content: space-between; align-items: baseline; gap: 16px; }
+    .gear-name {
+      font-family: var(--disp); font-weight: 700; font-size: 20px;
+      text-transform: uppercase; color: var(--cream); letter-spacing: 0.03em;
+      flex-shrink: 0;
+    }
+    .gear-detail { font-size: 12px; font-weight: 300; color: var(--muted); text-align: right; }
+
     /* ── CREDITS ── */
     .credits-section { background: var(--black2); padding: 88px 48px; }
     .credits-hed {
@@ -552,6 +576,10 @@
       .about-hed { font-size: 56px; }
       .studio-strip { height: 240px; }
       .services-grid { grid-template-columns: 1fr; }
+      .gear-layout { grid-template-columns: 1fr; gap: 36px; }
+      .gear-hed { font-size: 52px; position: static; }
+      .gear-item { flex-direction: column; gap: 4px; }
+      .gear-detail { text-align: left; }
       .credits-visual-grid { grid-template-columns: repeat(3, 1fr); }
       .credits-hed { font-size: 56px; }
       .review-grid { grid-template-columns: 1fr; }
@@ -573,6 +601,7 @@
     <div class="nav-links">
       <a href="#about">About</a>
       <a href="#services">Services</a>
+      <a href="#gear">Gear</a>
       <a href="#credits">Credits</a>
       <a href="#mix-reel">Mix reel</a>
     </div>
@@ -697,6 +726,50 @@
   <div class="studio-strip">
     <img src="images/studio-bw.webp" alt="Mixing console in the studio" loading="lazy">
   </div>
+
+  <!-- GEAR -->
+  <section class="section" id="gear">
+    <div class="section-rule">
+      <div class="section-tag">The studio</div>
+      <div class="rule-line"></div>
+    </div>
+    <div class="gear-layout">
+      <div>
+        <h2 class="gear-hed">Tools of<br>the <span class="o">trade.</span></h2>
+      </div>
+      <div class="gear-list-col">
+        <div class="gear-category">
+          <div class="gear-cat-label">Monitoring</div>
+          <ul class="gear-items">
+            <li class="gear-item"><span class="gear-name">ATC Monitors</span><span class="gear-detail">Passive studio reference · made in England</span></li>
+            <li class="gear-item"><span class="gear-name">Studio Reference Amplifier</span><span class="gear-detail">Dedicated amplification for passive ATCs</span></li>
+          </ul>
+        </div>
+        <div class="gear-category">
+          <div class="gear-cat-label">Conversion &amp; Interface</div>
+          <ul class="gear-items">
+            <li class="gear-item"><span class="gear-name">Lynx Hilo</span><span class="gear-detail">Reference AD/DA converter</span></li>
+            <li class="gear-item"><span class="gear-name">Universal Audio Apollo x16</span><span class="gear-detail">Audio interface · UAD processing</span></li>
+          </ul>
+        </div>
+        <div class="gear-category">
+          <div class="gear-cat-label">Outboard</div>
+          <ul class="gear-items">
+            <li class="gear-item"><span class="gear-name">Empirical Labs Distressor</span><span class="gear-detail">Compressor / limiter</span></li>
+            <li class="gear-item"><span class="gear-name">Warm Audio WA76</span><span class="gear-detail">Limiting amplifier</span></li>
+            <li class="gear-item"><span class="gear-name">Benson Studio Tall Bird</span><span class="gear-detail">Tube preamp / DI</span></li>
+            <li class="gear-item"><span class="gear-name">Fredenstein Bento 8 Pro</span><span class="gear-detail">500-series rack · pure analog</span></li>
+          </ul>
+        </div>
+        <div class="gear-category">
+          <div class="gear-cat-label">DAW</div>
+          <ul class="gear-items">
+            <li class="gear-item"><span class="gear-name">Logic Pro</span><span class="gear-detail">Home base</span></li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </section>
 
   <!-- CREDITS -->
   <section class="credits-section" id="credits">
