@@ -127,15 +127,7 @@
     window.dataLayer = window.dataLayer || [];
     function gtag(){dataLayer.push(arguments);} 
     gtag('js', new Date());
-    // Enable debug_mode temporarily to surface client-side diagnostics in Console and DebugView
-    gtag('config', 'G-V3Z029X46P', { 'debug_mode': true });
-    // Temporary test event to verify Analytics reception (remove after verification)
-    try {
-      gtag('event', 'test_event', { 'event_label': 'cloudflare-pages-deploy-test', 'debug_mode': true });
-      console.info('GA test_event sent');
-    } catch (e) {
-      console.warn('GA test_event failed', e);
-    }
+    gtag('config', 'G-V3Z029X46P');
   </script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
