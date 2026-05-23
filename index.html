@@ -127,7 +127,8 @@
     window.dataLayer = window.dataLayer || [];
     function gtag(){dataLayer.push(arguments);} 
     gtag('js', new Date());
-    gtag('config', 'G-V3Z029X46P');
+    // Enable debug_mode temporarily to surface client-side diagnostics in Console and DebugView
+    gtag('config', 'G-V3Z029X46P', { 'debug_mode': true });
   </script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
