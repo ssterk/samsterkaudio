@@ -131,6 +131,10 @@
   </script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="preconnect" href="https://www.googletagmanager.com">
+  <link rel="icon" href="/favicon.svg" type="image/svg+xml">
+  <link rel="apple-touch-icon" href="/favicon.svg">
+  <link rel="preload" as="image" href="/images/hero-mobile.webp">
   <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:ital,wght@0,700;0,800;0,900;1,700&family=Barlow:wght@300;400&display=swap" rel="stylesheet">
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -615,7 +619,7 @@
 
   <!-- NAV -->
   <nav>
-    <a href="#" class="nav-logo">Sam Sterk<span> Audio</span></a>
+    <a href="/" aria-label="Home" class="nav-logo">Sam Sterk<span> Audio</span></a>
     <div class="nav-links">
       <a href="#about">About</a>
       <a href="#services">Services</a>
@@ -631,7 +635,7 @@
     <div class="hero-bg">
       <picture>
         <source srcset="images/hero.webp" media="(min-width: 769px)">
-        <img src="images/hero-mobile.webp" alt="Sam Sterk at his mixing console in Vista, CA" fetchpriority="high">
+        <img src="images/hero-mobile.webp" alt="Sam Sterk at his mixing console in Vista, CA" width="768" height="670" fetchpriority="high">
       </picture>
     </div>
     <div class="hero-overlay"></div>
@@ -642,7 +646,7 @@
     </h1>
     <div class="hero-footer">
       <p class="hero-desc">Rock, folk, worship, pop, and beyond. 20 years experience. 10 million+ streams. Send me something you're proud of.</p>
-      <a href="https://soundbetter.com/profiles/3513-sam-sterk" target="_blank" rel="noopener" class="btn-primary">Send me your project →</a>
+      <a href="https://soundbetter.com/profiles/3513-sam-sterk" target="_blank" rel="noopener noreferrer" class="btn-primary">Send me your project →</a>
     </div>
   </section>
 
@@ -679,7 +683,7 @@
     <div class="about-grid">
       <div>
         <div class="about-photo">
-          <img src="images/about.webp" alt="Sam Sterk at work in the studio" loading="lazy">
+          <img src="images/about.webp" alt="Sam Sterk at work in the studio" width="900" height="475" loading="lazy">
         </div>
         <h2 class="about-hed">I make<br>records<br><span class="o">sound<br>right.</span></h2>
         <div class="about-stats">
@@ -757,7 +761,7 @@
 
   <!-- STUDIO STRIP -->
   <div class="studio-strip">
-    <img src="images/studio-bw.webp" alt="Mixing console in the studio" loading="lazy">
+    <img src="images/studio-bw.webp" alt="Mixing console in the studio" width="1920" height="1317" loading="lazy">
   </div>
 
   <!-- GEAR -->
@@ -955,7 +959,7 @@
 
     </div>
     <div class="credits-footer">
-      <a href="https://credits.muso.ai/profile/592690dd-3ef4-49d0-8706-8df462789fef/credits" target="_blank" rel="noopener" class="credits-muso-link">Full credits on Muso.ai →</a>
+      <a href="https://credits.muso.ai/profile/592690dd-3ef4-49d0-8706-8df462789fef/credits" target="_blank" rel="noopener noreferrer" class="credits-muso-link">Full credits on Muso.ai →</a>
     </div>
   </section>
 
@@ -1063,10 +1067,10 @@
   <div class="social-row">
     <span class="social-row-label">Find me on</span>
     <div class="social-links">
-      <a href="https://www.instagram.com/samuel.sterk/" target="_blank" rel="noopener" class="social-link">Instagram</a>
-      <a href="https://open.spotify.com/playlist/2DdlPsXatgkaBtTelERZ1V?si=42e6ff372cc44885" target="_blank" rel="noopener" class="social-link">Spotify</a>
-      <a href="https://credits.muso.ai/profile/592690dd-3ef4-49d0-8706-8df462789fef" target="_blank" rel="noopener" class="social-link">Muso.ai</a>
-      <a href="https://soundbetter.com/profiles/3513-sam-sterk" target="_blank" rel="noopener" class="social-link">SoundBetter</a>
+      <a href="https://www.instagram.com/samuel.sterk/" target="_blank" rel="noopener noreferrer" class="social-link">Instagram</a>
+      <a href="https://open.spotify.com/playlist/2DdlPsXatgkaBtTelERZ1V?si=42e6ff372cc44885" target="_blank" rel="noopener noreferrer" class="social-link">Spotify</a>
+      <a href="https://credits.muso.ai/profile/592690dd-3ef4-49d0-8706-8df462789fef" target="_blank" rel="noopener noreferrer" class="social-link">Muso.ai</a>
+      <a href="https://soundbetter.com/profiles/3513-sam-sterk" target="_blank" rel="noopener noreferrer" class="social-link">SoundBetter</a>
     </div>
   </div>
 
@@ -1074,10 +1078,10 @@
   <footer>
     <div class="footer-logo">Sam Sterk<span> Audio</span></div>
     <div class="footer-links">
-      <a href="https://www.instagram.com/samuel.sterk/" target="_blank" rel="noopener">Instagram</a>
-      <a href="https://soundbetter.com/profiles/3513-sam-sterk" target="_blank" rel="noopener">SoundBetter</a>
-      <a href="https://open.spotify.com/playlist/2DdlPsXatgkaBtTelERZ1V" target="_blank" rel="noopener">Mix reel</a>
-      <a href="https://credits.muso.ai/profile/592690dd-3ef4-49d0-8706-8df462789fef" target="_blank" rel="noopener">Credits</a>
+      <a href="https://www.instagram.com/samuel.sterk/" target="_blank" rel="noopener noreferrer">Instagram</a>
+      <a href="https://soundbetter.com/profiles/3513-sam-sterk" target="_blank" rel="noopener noreferrer">SoundBetter</a>
+      <a href="https://open.spotify.com/playlist/2DdlPsXatgkaBtTelERZ1V" target="_blank" rel="noopener noreferrer">Mix reel</a>
+      <a href="https://credits.muso.ai/profile/592690dd-3ef4-49d0-8706-8df462789fef" target="_blank" rel="noopener noreferrer">Credits</a>
     </div>
     <div class="footer-copy">© 2026 samsterkaudio.com · Vista, CA · San Diego</div>
   </footer>
