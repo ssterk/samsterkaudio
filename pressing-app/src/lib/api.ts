@@ -22,6 +22,35 @@ export type Release = {
   createdAt: string;
 };
 
+export type TrackVersion = {
+  id: string;
+  trackId: string;
+  label: string;
+  originalKey: string;
+  streamKey: string | null;
+  peaksKey: string | null;
+  status: "pending" | "processing" | "ready" | "failed";
+  active: boolean;
+  createdAt: string;
+};
+
+export type Track = {
+  id: string;
+  releaseId: string;
+  position: number;
+  title: string;
+  duration: number | null;
+  sampleRate: number | null;
+  bitDepth: number | null;
+  createdAt: string;
+  versions: TrackVersion[];
+};
+
+export type ReleaseDetail = {
+  release: Release;
+  tracks: Track[];
+};
+
 export type InviteInfo = {
   email: string;
   release: { title: string; artist: string; type: string } | null;
@@ -29,6 +58,30 @@ export type InviteInfo = {
 
 export const api = {
   releases: () => request<{ releases: Release[] }>("/releases"),
+  createRelease: (body: { title: string; artist: string; type: "single" | "ep" | "lp" }) =>
+    request<{ id: string }>("/releases", { method: "POST", body: JSON.stringify(body) }),
+  release: (id: string) => request<ReleaseDetail>(`/releases/${id}`),
+  createTrack: (releaseId: string, filename: string) =>
+    request<{ trackId: string; versionId: string; uploadUrl: string }>(`/releases/${releaseId}/tracks`, {
+      method: "POST",
+      body: JSON.stringify({ filename }),
+    }),
+  uploadTrackVersion: async (versionId: string, file: File, onProgress?: (pct: number) => void) => {
+    await new Promise<void>((resolve, reject) => {
+      const xhr = new XMLHttpRequest();
+      xhr.open("PUT", `${BASE}/track-versions/${versionId}/upload`);
+      xhr.withCredentials = true;
+      xhr.setRequestHeader("Content-Type", file.type || "application/octet-stream");
+      xhr.upload.onprogress = (e) => {
+        if (e.lengthComputable && onProgress) onProgress(Math.round((e.loaded / e.total) * 100));
+      };
+      xhr.onload = () => (xhr.status >= 200 && xhr.status < 300 ? resolve() : reject(new Error(xhr.statusText)));
+      xhr.onerror = () => reject(new Error("upload failed"));
+      xhr.send(file);
+    });
+  },
+  streamUrl: (versionId: string) => `${BASE}/stream/${versionId}`,
+  peaksUrl: (versionId: string) => `${BASE}/stream/${versionId}/peaks`,
   invite: (token: string) => request<InviteInfo>(`/invites/${token}`),
   requestMagicLink: (token: string) =>
     request<{ sent: boolean }>(`/invites/${token}/request-magic-link`, {

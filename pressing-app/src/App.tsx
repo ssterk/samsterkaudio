@@ -4,6 +4,7 @@ import { useSession } from "./lib/auth-client";
 import { AppShell } from "./components/AppShell";
 import { Login } from "./routes/Login";
 import { Library } from "./routes/Library";
+import { ReleaseDetail } from "./routes/ReleaseDetail";
 import { AcceptInvite } from "./routes/AcceptInvite";
 import { InviteComplete } from "./routes/InviteComplete";
 
@@ -29,6 +30,7 @@ export default function App() {
         }
       >
         <Route index element={<Library />} />
+        <Route path="releases/:id" element={<ReleaseDetail />} />
       </Route>
     </Routes>
   );

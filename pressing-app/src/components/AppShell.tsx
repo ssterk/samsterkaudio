@@ -28,7 +28,10 @@ export function AppShell() {
             PRESSING
           </div>
           <div className="flex gap-6">
-            <div className="border-b-2 border-accent pb-1 font-display text-base font-bold tracking-[0.14em] text-cream">
+            <div
+              onClick={() => navigate("/")}
+              className="cursor-pointer border-b-2 border-accent pb-1 font-display text-base font-bold tracking-[0.14em] text-cream"
+            >
               LIBRARY
             </div>
           </div>

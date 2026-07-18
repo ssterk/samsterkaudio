@@ -22,6 +22,23 @@
       "database_id": "789cac5b-b077-4b63-a01a-a8ec153617a6"
     }
   ],
+  "r2_buckets": [
+    {
+      "binding": "MEDIA",
+      "bucket_name": "pressing-media"
+    }
+  ],
+  "queues": {
+    "producers": [
+      { "binding": "PROCESS_QUEUE", "queue": "pressing-process" }
+    ],
+    "consumers": [
+      { "queue": "pressing-process" }
+    ]
+  },
+  "vars": {
+    "BETTER_AUTH_URL": "https://samsterkaudio.com"
+  },
   "compatibility_flags": [
     "nodejs_compat"
   ]
