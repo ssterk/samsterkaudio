@@ -54,6 +54,11 @@ export const tracks = sqliteTable("tracks", {
   duration: real("duration"),
   sampleRate: integer("sample_rate"),
   bitDepth: integer("bit_depth"),
+  // Dropbox filename this track was imported from — lets re-importing the
+  // same folder match existing tracks (by filename, not title, since title
+  // may get hand-edited later) and add a new version instead of duplicating.
+  // Null for manually-uploaded tracks.
+  sourceFilename: text("source_filename"),
   createdAt: integer("created_at", { mode: "timestamp_ms" })
     .default(sql`(cast(unixepoch('subsecond') * 1000 as integer))`)
     .notNull(),
@@ -78,6 +83,17 @@ export const trackVersions = sqliteTable("track_versions", {
     .default("pending"),
   active: integer("active", { mode: "boolean" }).notNull().default(true),
   createdAt: integer("created_at", { mode: "timestamp_ms" })
+    .default(sql`(cast(unixepoch('subsecond') * 1000 as integer))`)
+    .notNull(),
+});
+
+// Single row (id is always "default") — one owner, one Dropbox connection.
+export const dropboxTokens = sqliteTable("dropbox_tokens", {
+  id: text("id").primaryKey(),
+  refreshTokenEncrypted: text("refresh_token_encrypted").notNull(),
+  accountId: text("account_id"),
+  accountEmail: text("account_email"),
+  connectedAt: integer("connected_at", { mode: "timestamp_ms" })
     .default(sql`(cast(unixepoch('subsecond') * 1000 as integer))`)
     .notNull(),
 });

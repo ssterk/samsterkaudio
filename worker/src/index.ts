@@ -7,6 +7,7 @@ import { releases } from "./routes/releases";
 import { invites } from "./routes/invites";
 import { trackVersions } from "./routes/track-versions";
 import { stream } from "./routes/stream";
+import { dropbox } from "./routes/dropbox";
 import { handleQueue } from "./queue";
 
 const app = new Hono<{ Bindings: Env; Variables: AppVariables }>();
@@ -25,6 +26,7 @@ app.route("/api/pressing/releases", releases);
 app.route("/api/pressing/invites", invites);
 app.route("/api/pressing/track-versions", trackVersions);
 app.route("/api/pressing/stream", stream);
+app.route("/api/pressing/dropbox", dropbox);
 
 // Everything else is a static asset: the existing marketing site, or the
 // Pressing SPA bundle under /pressing/*. Built files only ever live directly

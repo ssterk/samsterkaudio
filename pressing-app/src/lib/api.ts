@@ -56,6 +56,15 @@ export type InviteInfo = {
   release: { title: string; artist: string; type: string } | null;
 };
 
+export type DropboxStatus = { connected: boolean; email: string | null };
+export type DropboxFolder = { name: string; path: string };
+export type DropboxFile = { name: string; path: string; size: number };
+export type DropboxBrowseResult = {
+  folders: DropboxFolder[];
+  audioFiles: DropboxFile[];
+  artworkCandidate: DropboxFile | null;
+};
+
 export const api = {
   releases: () => request<{ releases: Release[] }>("/releases"),
   createRelease: (body: { title: string; artist: string; type: "single" | "ep" | "lp" }) =>
@@ -82,6 +91,18 @@ export const api = {
   },
   streamUrl: (versionId: string) => `${BASE}/stream/${versionId}`,
   peaksUrl: (versionId: string) => `${BASE}/stream/${versionId}/peaks`,
+  dropboxStatus: () => request<DropboxStatus>("/dropbox/status"),
+  dropboxDisconnect: () => request<{ ok: boolean }>("/dropbox/disconnect", { method: "POST" }),
+  dropboxBrowse: (path: string) =>
+    request<DropboxBrowseResult>(`/dropbox/browse?path=${encodeURIComponent(path)}`),
+  dropboxImport: (body: {
+    releaseId?: string;
+    title?: string;
+    artist?: string;
+    type?: "single" | "ep" | "lp";
+    tracks: { name: string; path: string }[];
+    artworkPath?: string;
+  }) => request<{ releaseId: string }>("/dropbox/import", { method: "POST", body: JSON.stringify(body) }),
   invite: (token: string) => request<InviteInfo>(`/invites/${token}`),
   requestMagicLink: (token: string) =>
     request<{ sent: boolean }>(`/invites/${token}/request-magic-link`, {

@@ -1,2 +1,5 @@
 BETTER_AUTH_SECRET=replace-with-a-random-64-char-hex-string
 BETTER_AUTH_URL=http://localhost:8787
+DROPBOX_APP_KEY=your-dropbox-app-key
+DROPBOX_APP_SECRET=your-dropbox-app-secret
+DROPBOX_TOKEN_ENCRYPTION_KEY=replace-with-a-random-64-char-hex-string

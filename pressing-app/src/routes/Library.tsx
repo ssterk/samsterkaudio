@@ -47,12 +47,20 @@ export function Library() {
           </div>
         </div>
         {isOwner && (
-          <button
-            onClick={() => setFormOpen((v) => !v)}
-            className="cursor-pointer border-none bg-accent px-6 py-3.5 font-display text-lg font-black tracking-[0.1em] text-bg hover:bg-accent-hover"
-          >
-            {formOpen ? "CANCEL" : "NEW RELEASE"}
-          </button>
+          <div className="flex gap-3">
+            <button
+              onClick={() => navigate("/import")}
+              className="cursor-pointer border border-line bg-transparent px-6 py-3.5 font-display text-lg font-black tracking-[0.1em] text-cream hover:border-muted"
+            >
+              IMPORT FROM DROPBOX
+            </button>
+            <button
+              onClick={() => setFormOpen((v) => !v)}
+              className="cursor-pointer border-none bg-accent px-6 py-3.5 font-display text-lg font-black tracking-[0.1em] text-bg hover:bg-accent-hover"
+            >
+              {formOpen ? "CANCEL" : "NEW RELEASE"}
+            </button>
+          </div>
         )}
       </div>
 
