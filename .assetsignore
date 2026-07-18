@@ -1,0 +1,28 @@
+node_modules
+Pictures
+.git
+.wrangler
+.gitignore
+.assetsignore
+.DS_Store
+package.json
+package-lock.json
+wrangler.jsonc
+tsconfig.json
+drizzle.config.ts
+DEPLOY.txt
+PLAN.md
+
+# secrets — never serve these as static assets
+.dev.vars
+.dev.vars.example
+.env
+.env.*
+
+# source, not build output — the Worker script is bundled separately via
+# `main`, and the SPA build output lives in /pressing/, not /pressing-app/
+worker
+pressing-app
+
+# D1 schema/migrations — internal, not public
+migrations

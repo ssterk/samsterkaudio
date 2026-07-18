@@ -1,0 +1,44 @@
+{
+  "name": "samsterkaudio.com",
+  "version": "1.0.0",
+  "description": "samsterkaudio.com static site, deployed via Cloudflare Pages",
+  "private": true,
+  "scripts": {
+    "dev:worker": "wrangler dev",
+    "dev:app": "vite dev --config pressing-app/vite.config.ts",
+    "build": "vite build --config pressing-app/vite.config.ts",
+    "deploy": "npm run build && wrangler deploy",
+    "typecheck": "tsc --noEmit && tsc --noEmit -p pressing-app/tsconfig.json",
+    "db:generate": "drizzle-kit generate",
+    "db:migrate:local": "wrangler d1 migrations apply pressing --local",
+    "db:migrate:remote": "wrangler d1 migrations apply pressing --remote",
+    "login": "wrangler login",
+    "whoami": "wrangler whoami"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ssterk/samsterkaudio.git"
+  },
+  "homepage": "https://github.com/ssterk/samsterkaudio#readme",
+  "devDependencies": {
+    "@better-auth/cli": "^1.4.21",
+    "@cloudflare/workers-types": "^4.20260702.1",
+    "@tailwindcss/vite": "^4.3.3",
+    "@types/react": "^19.2.17",
+    "@types/react-dom": "^19.2.3",
+    "@vitejs/plugin-react": "^6.0.3",
+    "drizzle-kit": "^0.31.10",
+    "tailwindcss": "^4.3.3",
+    "typescript": "^7.0.2",
+    "vite": "^8.1.5",
+    "wrangler": "^4.103.0"
+  },
+  "dependencies": {
+    "better-auth": "^1.6.23",
+    "drizzle-orm": "^0.45.2",
+    "hono": "^4.12.30",
+    "react": "^19.2.7",
+    "react-dom": "^19.2.7",
+    "react-router-dom": "^7.18.1"
+  }
+}

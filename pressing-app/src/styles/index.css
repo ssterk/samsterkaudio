@@ -1,0 +1,46 @@
+@import "tailwindcss";
+
+/*
+ * Design tokens pulled from the approved Claude Design prototype
+ * (~/Downloads/pressing-private-music-app/project/Pressing.dc.html).
+ * Kept distinct from the marketing site's own near-identical tokens — see
+ * PLAN.md §2 for why the two aren't reconciled to a single set.
+ */
+@theme {
+  --color-bg: #0d0d0d;
+  --color-bg2: #141414;
+  --color-panel: #161311;
+  --color-line: #2a2521;
+  --color-cream: #f2ead9;
+  --color-muted: #8f867a;
+  --color-dim: #5c564d;
+  --color-accent: #c45c3a;
+  --color-accent-hover: #d56a46;
+
+  --font-display: "Barlow Condensed", Impact, "Arial Narrow", sans-serif;
+  --font-body: "Barlow", "Helvetica Neue", Arial, sans-serif;
+  --font-mono: "IBM Plex Mono", ui-monospace, monospace;
+}
+
+html,
+body,
+#root {
+  height: 100%;
+}
+
+body {
+  background: var(--color-bg);
+  color: var(--color-cream);
+  font-family: var(--font-body);
+}
+
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+::-webkit-scrollbar-thumb {
+  background: var(--color-line);
+}
+::-webkit-scrollbar-track {
+  background: var(--color-bg);
+}
