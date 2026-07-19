@@ -12,6 +12,7 @@ export function ImportDropbox() {
   const [path, setPath] = useState("");
   const [folders, setFolders] = useState<{ name: string; path: string }[]>([]);
   const [audioFiles, setAudioFiles] = useState<DropboxFile[]>([]);
+  const [checkedPaths, setCheckedPaths] = useState<Set<string>>(new Set());
   const [artworkCandidate, setArtworkCandidate] = useState<DropboxFile | null>(null);
   const [browseError, setBrowseError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
@@ -44,6 +45,7 @@ export function ImportDropbox() {
         setPath(newPath);
         setFolders(r.folders);
         setAudioFiles(r.audioFiles);
+        setCheckedPaths(new Set(r.audioFiles.map((f) => f.path))); // select all by default
         setArtworkCandidate(r.artworkCandidate);
       })
       .catch((e: Error) => setBrowseError(e.message))
@@ -55,8 +57,17 @@ export function ImportDropbox() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [connected]);
 
+  function toggleChecked(filePath: string) {
+    setCheckedPaths((prev) => {
+      const next = new Set(prev);
+      if (next.has(filePath)) next.delete(filePath);
+      else next.add(filePath);
+      return next;
+    });
+  }
+
   function startConfirm() {
-    setSelectedTracks(audioFiles);
+    setSelectedTracks(audioFiles.filter((f) => checkedPaths.has(f.path)));
     const folderName = path.split("/").filter(Boolean).pop() ?? "";
     setTitle(folderName);
     setConfirming(true);
@@ -275,21 +286,46 @@ export function ImportDropbox() {
 
       {audioFiles.length > 0 && (
         <>
-          <div className="mb-2 font-display text-xl font-black tracking-[0.03em]">
-            AUDIO FILES ({audioFiles.length})
+          <div className="mb-2 flex items-center justify-between">
+            <div className="font-display text-xl font-black tracking-[0.03em]">
+              AUDIO FILES ({audioFiles.length})
+            </div>
+            <div className="flex gap-3 font-mono text-[10px] tracking-[0.1em] text-dim">
+              <button
+                onClick={() => setCheckedPaths(new Set(audioFiles.map((f) => f.path)))}
+                className="cursor-pointer border-none bg-transparent text-dim hover:text-cream"
+              >
+                SELECT ALL
+              </button>
+              <button
+                onClick={() => setCheckedPaths(new Set())}
+                className="cursor-pointer border-none bg-transparent text-dim hover:text-cream"
+              >
+                SELECT NONE
+              </button>
+            </div>
           </div>
           <div className="mb-8 flex flex-col gap-1">
             {audioFiles.map((f) => (
-              <div key={f.path} className="border border-line px-4 py-2.5 text-sm text-muted">
+              <label
+                key={f.path}
+                className="flex cursor-pointer items-center gap-3 border border-line px-4 py-2.5 text-sm text-muted hover:border-muted"
+              >
+                <input
+                  type="checkbox"
+                  checked={checkedPaths.has(f.path)}
+                  onChange={() => toggleChecked(f.path)}
+                />
                 {f.name}
-              </div>
+              </label>
             ))}
           </div>
           <button
             onClick={startConfirm}
-            className="cursor-pointer border-none bg-accent px-6 py-3.5 font-display text-lg font-black tracking-[0.1em] text-bg hover:bg-accent-hover"
+            disabled={checkedPaths.size === 0}
+            className="cursor-pointer border-none bg-accent px-6 py-3.5 font-display text-lg font-black tracking-[0.1em] text-bg hover:bg-accent-hover disabled:opacity-60"
           >
-            IMPORT THIS FOLDER
+            IMPORT SELECTED ({checkedPaths.size})
           </button>
         </>
       )}
