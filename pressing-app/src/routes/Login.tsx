@@ -67,6 +67,12 @@ export function Login() {
       <div className="mt-16 font-mono text-[10px] tracking-[0.1em] text-dim">
         44.1kHz / 24-BIT · MASTER COPY · DO NOT DUPLICATE
       </div>
+      <a
+        href="https://samsterkaudio.com"
+        className="mt-6 font-mono text-[10px] tracking-[0.1em] text-dim hover:text-accent"
+      >
+        ← SAMSTERKAUDIO.COM
+      </a>
     </div>
   );
 }

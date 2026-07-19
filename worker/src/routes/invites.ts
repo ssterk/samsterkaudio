@@ -73,6 +73,37 @@ invites.get("/:token", async (c) => {
   });
 });
 
+// Public: serves the release's artwork so shared invite links unfurl with a
+// real image in iMessage/Slack/etc. — scoped by invite token, same trust
+// model as the invite-info lookup above (the token is the capability, not a
+// guessable release id).
+invites.get("/:token/artwork", async (c) => {
+  const db = drizzle(c.env.DB, { schema });
+  const token = c.req.param("token");
+
+  const [invite] = await db
+    .select()
+    .from(schema.invites)
+    .where(eq(schema.invites.token, token));
+  if (!invite || !isLive(invite)) return c.notFound();
+
+  const [release] = await db
+    .select()
+    .from(schema.releases)
+    .where(eq(schema.releases.id, invite.releaseId));
+  if (!release?.artworkKey) return c.notFound();
+
+  const obj = await c.env.MEDIA.get(release.artworkKey);
+  if (!obj || !obj.body) return c.notFound();
+
+  return new Response(obj.body, {
+    headers: {
+      "Content-Type": obj.httpMetadata?.contentType ?? "image/jpeg",
+      "Cache-Control": "public, max-age=3600",
+    },
+  });
+});
+
 // Public: triggers a real better-auth magic-link sign-in for the invite's
 // email. Clicking that link is what actually proves email ownership and
 // creates the session — the invite token alone never does.

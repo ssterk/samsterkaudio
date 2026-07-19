@@ -10,6 +10,7 @@ import { stream } from "./routes/stream";
 import { dropbox } from "./routes/dropbox";
 import { tracks } from "./routes/tracks";
 import { comments } from "./routes/comments";
+import { getInvitePreview } from "./invite-preview";
 import { handleQueue } from "./queue";
 
 const app = new Hono<{ Bindings: Env; Variables: AppVariables }>();
@@ -31,6 +32,32 @@ app.route("/api/pressing/stream", stream);
 app.route("/api/pressing/dropbox", dropbox);
 app.route("/api/pressing/tracks", tracks);
 app.route("/api/pressing/comments", comments);
+
+// Shared invite links get pasted into texts/Slack/group chats — this makes
+// the unfurled preview card itself branded (real release title/artist and
+// artwork) instead of the generic "Pressing" fallback in index.html, before
+// anyone even clicks through.
+app.get("/pressing/invite/:token", async (c) => {
+  const token = c.req.param("token");
+  const preview = await getInvitePreview(c.env, token);
+
+  const assetResponse = await c.env.ASSETS.fetch(new Request(new URL("/pressing/", c.req.url), c.req.raw));
+  if (!preview || !assetResponse.body) return assetResponse;
+
+  const title = `${preview.release.title} — Sam Sterk Audio`;
+  const description = `${preview.release.artist} · A private mix from Sam Sterk Audio. Listen and leave feedback.`;
+  const imageUrl = preview.hasArtwork
+    ? `${c.env.BETTER_AUTH_URL}/api/pressing/invites/${token}/artwork`
+    : `${c.env.BETTER_AUTH_URL}/images/og.jpg`;
+
+  return new HTMLRewriter()
+    .on("title", { element: (el) => void el.setInnerContent(title) })
+    .on('meta[name="description"]', { element: (el) => void el.setAttribute("content", description) })
+    .on('meta[property="og:title"]', { element: (el) => void el.setAttribute("content", title) })
+    .on('meta[property="og:description"]', { element: (el) => void el.setAttribute("content", description) })
+    .on('meta[property="og:image"]', { element: (el) => void el.setAttribute("content", imageUrl) })
+    .transform(assetResponse);
+});
 
 // Everything else is a static asset: the existing marketing site, or the
 // Pressing SPA bundle under /pressing/*. Built files only ever live directly

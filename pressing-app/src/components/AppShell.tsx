@@ -37,6 +37,15 @@ export function AppShell() {
           </div>
         </div>
         <div className="flex items-center gap-4">
+          <a
+            href="https://samsterkaudio.com"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="font-mono text-[10px] tracking-[0.08em] text-dim hover:text-accent"
+          >
+            SAMSTERKAUDIO.COM →
+          </a>
+          <div className="h-3 w-px bg-line" />
           <div className="font-mono text-[10px] tracking-[0.08em] text-dim">
             MASTER · SELF-HOSTED
           </div>

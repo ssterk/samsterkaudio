@@ -29,6 +29,7 @@ export function AcceptInvite() {
         <div className="font-display text-3xl font-black text-dim">
           INVITE NOT FOUND OR EXPIRED
         </div>
+        <StudioFooter />
       </Centered>
     );
   }
@@ -56,7 +57,34 @@ export function AcceptInvite() {
           SEND ME A SIGN-IN LINK
         </button>
       )}
+      <StudioFooter />
     </Centered>
+  );
+}
+
+function StudioFooter() {
+  return (
+    <div className="mt-20 flex flex-col items-center gap-3 border-t border-line pt-8">
+      <a
+        href="https://samsterkaudio.com"
+        target="_blank"
+        rel="noopener noreferrer"
+        className="font-display text-2xl font-black tracking-[0.03em] text-cream hover:text-accent"
+      >
+        Sam Sterk<span className="text-accent">&nbsp;Audio</span>
+      </a>
+      <div className="text-[11px] tracking-[0.2em] text-dim">
+        MIXING ENGINEER · VISTA, CA · SAN DIEGO · NASHVILLE TRAINED
+      </div>
+      <a
+        href="https://samsterkaudio.com"
+        target="_blank"
+        rel="noopener noreferrer"
+        className="mt-1 font-display text-xs font-bold tracking-[0.14em] text-accent hover:text-cream"
+      >
+        HEAR MORE OF THE WORK →
+      </a>
+    </div>
   );
 }
 
