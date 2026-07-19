@@ -66,7 +66,7 @@ export type DropboxBrowseResult = {
   artworkCandidate: DropboxFile | null;
 };
 
-export type AccessEntry = { userId: string; email: string; name: string; canDownload: boolean };
+export type AccessEntry = { userId: string; email: string; name: string };
 
 export type Comment = {
   id: string;
@@ -133,11 +133,6 @@ export const api = {
   markReleaseViewed: (releaseId: string) =>
     request<{ ok: boolean }>(`/releases/${releaseId}/view`, { method: "POST" }),
   releaseAccess: (releaseId: string) => request<{ access: AccessEntry[] }>(`/releases/${releaseId}/access`),
-  updateAccess: (releaseId: string, userId: string, canDownload: boolean) =>
-    request<{ ok: boolean }>(`/releases/${releaseId}/access/${userId}`, {
-      method: "PATCH",
-      body: JSON.stringify({ canDownload }),
-    }),
   revokeAccess: (releaseId: string, userId: string) =>
     request<{ ok: boolean }>(`/releases/${releaseId}/access/${userId}`, { method: "DELETE" }),
   createInvite: (email: string, releaseId: string) =>

@@ -40,7 +40,8 @@ export const invites = sqliteTable("invites", {
   releaseId: text("release_id")
     .notNull()
     .references(() => releases.id, { onDelete: "cascade" }),
-  expiresAt: integer("expires_at", { mode: "timestamp_ms" }).notNull(),
+  // Null = never expires. Invites are still single-use (usedAt).
+  expiresAt: integer("expires_at", { mode: "timestamp_ms" }),
   usedAt: integer("used_at", { mode: "timestamp_ms" }),
 });
 

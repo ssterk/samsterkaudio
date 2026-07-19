@@ -194,7 +194,6 @@ releases.get("/:id/access", async (c) => {
   const rows = await db
     .select({
       userId: schema.releaseAccess.userId,
-      canDownload: schema.releaseAccess.canDownload,
       email: schema.user.email,
       name: schema.user.name,
     })
@@ -206,19 +205,6 @@ releases.get("/:id/access", async (c) => {
 });
 
 releases.use("/:id/access/:userId", requireAuth, requireOwner);
-releases.patch("/:id/access/:userId", async (c) => {
-  const releaseId = c.req.param("id");
-  const userId = c.req.param("userId");
-  const body = await c.req.json<{ canDownload: boolean }>();
-
-  const db = drizzle(c.env.DB, { schema });
-  await db
-    .update(schema.releaseAccess)
-    .set({ canDownload: body.canDownload })
-    .where(and(eq(schema.releaseAccess.releaseId, releaseId), eq(schema.releaseAccess.userId, userId)));
-
-  return c.json({ ok: true });
-});
 releases.delete("/:id/access/:userId", async (c) => {
   const releaseId = c.req.param("id");
   const userId = c.req.param("userId");

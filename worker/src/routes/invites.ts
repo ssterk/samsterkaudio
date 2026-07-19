@@ -9,10 +9,8 @@ import { createAuth } from "../auth";
 
 export const invites = new Hono<{ Bindings: Env; Variables: AppVariables }>();
 
-const SEVEN_DAYS_MS = 7 * 24 * 60 * 60 * 1000;
-
-function isLive(invite: { usedAt: Date | null; expiresAt: Date }) {
-  return !invite.usedAt && invite.expiresAt.getTime() > Date.now();
+function isLive(invite: { usedAt: Date | null; expiresAt: Date | null }) {
+  return !invite.usedAt && (!invite.expiresAt || invite.expiresAt.getTime() > Date.now());
 }
 
 // Owner creates an invite for a release. There's no send pipeline yet (see
@@ -40,7 +38,6 @@ invites.post("/", async (c) => {
     token,
     email: body.email,
     releaseId: body.releaseId,
-    expiresAt: new Date(Date.now() + SEVEN_DAYS_MS),
   });
 
   return c.json({
@@ -60,7 +57,7 @@ invites.get("/:token", async (c) => {
     .from(schema.invites)
     .where(eq(schema.invites.token, token));
   if (!invite || !isLive(invite)) {
-    return c.json({ error: "invite not found or expired" }, 410);
+    return c.json({ error: "invite not found, already used, or expired" }, 410);
   }
 
   const [release] = await db
@@ -88,7 +85,7 @@ invites.post("/:token/request-magic-link", async (c) => {
     .from(schema.invites)
     .where(eq(schema.invites.token, token));
   if (!invite || !isLive(invite)) {
-    return c.json({ error: "invite not found or expired" }, 410);
+    return c.json({ error: "invite not found, already used, or expired" }, 410);
   }
 
   const auth = createAuth(c.env);
@@ -116,7 +113,7 @@ invites.post("/:token/accept", async (c) => {
     .from(schema.invites)
     .where(eq(schema.invites.token, token));
   if (!invite || !isLive(invite)) {
-    return c.json({ error: "invite not found or expired" }, 410);
+    return c.json({ error: "invite not found, already used, or expired" }, 410);
   }
   if (invite.email.toLowerCase() !== session.user.email.toLowerCase()) {
     return c.json({ error: "this invite was issued to a different email" }, 403);

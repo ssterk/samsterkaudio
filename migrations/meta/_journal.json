@@ -29,6 +29,13 @@
       "when": 1784419838888,
       "tag": "0004_comments",
       "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "6",
+      "when": 1784420878055,
+      "tag": "0005_invites_no_expiry",
+      "breakpoints": true
     }
   ]
 }

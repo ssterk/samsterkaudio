@@ -72,7 +72,7 @@ export function SharePanel({ releaseId, onClose }: { releaseId: string; onClose:
         {inviteLink && (
           <div className="mb-6 mt-4 border border-line bg-bg p-3">
             <div className="mb-2 text-[10px] tracking-[0.14em] text-muted">
-              SHARE THIS LINK — VALID 7 DAYS, ONE-TIME USE
+              SHARE THIS LINK — ONE-TIME USE
             </div>
             <div className="flex gap-2">
               <input
@@ -99,22 +99,12 @@ export function SharePanel({ releaseId, onClose }: { releaseId: string; onClose:
                 <div className="text-sm">{a.name || a.email}</div>
                 <div className="text-xs text-dim">{a.email}</div>
               </div>
-              <div className="flex items-center gap-3">
-                <label className="flex items-center gap-1.5 text-[10px] tracking-[0.1em] text-muted">
-                  <input
-                    type="checkbox"
-                    checked={a.canDownload}
-                    onChange={(e) => api.updateAccess(releaseId, a.userId, e.target.checked).then(load)}
-                  />
-                  DOWNLOAD
-                </label>
-                <button
-                  onClick={() => api.revokeAccess(releaseId, a.userId).then(load)}
-                  className="cursor-pointer border-none bg-transparent text-xs text-dim hover:text-accent"
-                >
-                  REMOVE
-                </button>
-              </div>
+              <button
+                onClick={() => api.revokeAccess(releaseId, a.userId).then(load)}
+                className="cursor-pointer border-none bg-transparent text-xs text-dim hover:text-accent"
+              >
+                REMOVE
+              </button>
             </div>
           ))}
           {access?.length === 0 && (
