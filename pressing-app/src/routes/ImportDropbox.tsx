@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { api, type DropboxFile, type Release } from "../lib/api";
+import { formatRelativeTime } from "../lib/format";
 
 type SelectedTrack = DropboxFile;
 
@@ -309,14 +310,19 @@ export function ImportDropbox() {
             {audioFiles.map((f) => (
               <label
                 key={f.path}
-                className="flex cursor-pointer items-center gap-3 border border-line px-4 py-2.5 text-sm text-muted hover:border-muted"
+                className="flex cursor-pointer items-center justify-between gap-3 border border-line px-4 py-2.5 text-sm text-muted hover:border-muted"
               >
-                <input
-                  type="checkbox"
-                  checked={checkedPaths.has(f.path)}
-                  onChange={() => toggleChecked(f.path)}
-                />
-                {f.name}
+                <span className="flex items-center gap-3">
+                  <input
+                    type="checkbox"
+                    checked={checkedPaths.has(f.path)}
+                    onChange={() => toggleChecked(f.path)}
+                  />
+                  {f.name}
+                </span>
+                <span className="font-mono text-[10px] tracking-[0.08em] text-dim">
+                  {formatRelativeTime(f.modifiedAt)}
+                </span>
               </label>
             ))}
           </div>

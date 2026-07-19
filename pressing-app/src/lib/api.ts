@@ -58,7 +58,7 @@ export type InviteInfo = {
 
 export type DropboxStatus = { connected: boolean; email: string | null };
 export type DropboxFolder = { name: string; path: string };
-export type DropboxFile = { name: string; path: string; size: number };
+export type DropboxFile = { name: string; path: string; size: number; modifiedAt: string };
 export type DropboxBrowseResult = {
   folders: DropboxFolder[];
   audioFiles: DropboxFile[];

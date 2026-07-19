@@ -92,8 +92,12 @@ dropbox.get("/browse", async (c) => {
 
   const audioFiles = entries
     .filter((e) => e.tag === "file" && AUDIO_EXTENSIONS.has(extOf(e.name)))
-    .map((e) => ({ name: e.name, path: e.pathLower, size: e.size ?? 0 }))
-    .sort((a, b) => a.name.localeCompare(b.name));
+    .map((e) => ({ name: e.name, path: e.pathLower, size: e.size ?? 0, modifiedAt: e.serverModified ?? "" }))
+    // Most recently added first — makes it easy to spot what just landed in
+    // a folder you drop files into over time, rather than scanning an
+    // alphabetized list. Final track order is still adjustable on the
+    // import confirm screen.
+    .sort((a, b) => b.modifiedAt.localeCompare(a.modifiedAt));
 
   const imageFiles = entries
     .filter((e) => e.tag === "file" && IMAGE_EXTENSIONS.has(extOf(e.name)))

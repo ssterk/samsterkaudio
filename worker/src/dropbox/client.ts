@@ -81,6 +81,7 @@ export type DropboxEntry = {
   pathLower: string;
   pathDisplay: string;
   size?: number;
+  serverModified?: string;
 };
 
 export async function listFolder(accessToken: string, path: string): Promise<DropboxEntry[]> {
@@ -92,7 +93,14 @@ export async function listFolder(accessToken: string, path: string): Promise<Dro
   });
   if (!res.ok) throw new Error(`Dropbox list_folder failed: ${res.status} ${await res.text()}`);
   let body = await res.json<{
-    entries: Array<{ ".tag": string; name: string; path_lower: string; path_display: string; size?: number }>;
+    entries: Array<{
+      ".tag": string;
+      name: string;
+      path_lower: string;
+      path_display: string;
+      size?: number;
+      server_modified?: string;
+    }>;
     has_more: boolean;
     cursor: string;
   }>();
@@ -105,6 +113,7 @@ export async function listFolder(accessToken: string, path: string): Promise<Dro
         pathLower: e.path_lower,
         pathDisplay: e.path_display,
         size: e.size,
+        serverModified: e.server_modified,
       });
     }
   };
