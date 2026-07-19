@@ -1,6 +1,6 @@
 import { forwardRef, useEffect, useImperativeHandle, useRef, useState } from "react";
 import { Waveform } from "./Waveform";
-import { api, type Track } from "../lib/api";
+import type { Track } from "../lib/api";
 import { formatDuration } from "../lib/format";
 
 export type PlayerHandle = {
@@ -8,7 +8,14 @@ export type PlayerHandle = {
   getCurrentTime: () => number;
 };
 
-export const Player = forwardRef<PlayerHandle, { track: Track }>(function Player({ track }, ref) {
+// Auth-agnostic: the caller supplies the stream/peaks URLs and an optional
+// first-play hook, so the same component works both for logged-in playback
+// (session-cookie-gated URLs) and anonymous link playback (invite-token-
+// scoped URLs) without knowing which one it's in.
+export const Player = forwardRef<
+  PlayerHandle,
+  { track: Track; streamUrl: string; peaksUrl: string; onFirstPlay?: () => void }
+>(function Player({ track, streamUrl, peaksUrl, onFirstPlay }, ref) {
   const activeVersion = track.versions.find((v) => v.active) ?? track.versions[0];
   const audioRef = useRef<HTMLAudioElement>(null);
   const loggedListenRef = useRef(false);
@@ -33,10 +40,11 @@ export const Player = forwardRef<PlayerHandle, { track: Track }>(function Player
     setPlaying(false);
     loggedListenRef.current = false;
     if (!activeVersion || activeVersion.status !== "ready") return;
-    fetch(api.peaksUrl(activeVersion.id), { credentials: "include" })
+    fetch(peaksUrl, { credentials: "include" })
       .then((r) => r.json())
       .then(setPeaks)
       .catch(() => setPeaks(null));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [activeVersion?.id, activeVersion?.status]);
 
   function togglePlay() {
@@ -52,7 +60,7 @@ export const Player = forwardRef<PlayerHandle, { track: Track }>(function Player
     // play/pause toggle within the same listening session.
     if (!loggedListenRef.current) {
       loggedListenRef.current = true;
-      api.logListen(track.id).catch(() => {});
+      onFirstPlay?.();
     }
   }
 
@@ -98,7 +106,7 @@ export const Player = forwardRef<PlayerHandle, { track: Track }>(function Player
       {/* eslint-disable-next-line jsx-a11y/media-has-caption */}
       <audio
         ref={audioRef}
-        src={api.streamUrl(activeVersion.id)}
+        src={streamUrl}
         preload="metadata"
         onPlay={handlePlay}
         onPause={() => setPlaying(false)}

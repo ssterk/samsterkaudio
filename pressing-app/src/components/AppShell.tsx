@@ -22,10 +22,15 @@ export function AppShell() {
       <nav className="sticky top-0 z-50 flex h-[68px] items-center justify-between border-b border-line bg-bg/96 px-9 backdrop-blur-md">
         <div className="flex items-baseline gap-9">
           <div
-            className="cursor-pointer font-display text-[28px] font-black tracking-[0.06em]"
+            className="flex cursor-pointer items-baseline gap-3"
             onClick={() => navigate("/")}
+            title="Sam Sterk Audio"
           >
-            PRESSING
+            <span className="font-display text-sm font-bold tracking-[0.12em] text-muted">
+              SAM STERK<span className="text-accent">&nbsp;AUDIO</span>
+            </span>
+            <span className="text-line">/</span>
+            <span className="font-display text-[28px] font-black tracking-[0.06em]">PRESSING</span>
           </div>
           <div className="flex gap-6">
             <div

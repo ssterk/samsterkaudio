@@ -132,6 +132,22 @@ export const listens = sqliteTable("listens", {
     .notNull(),
 });
 
+// Separate from `listens` rather than a nullable userId there — anonymous,
+// link-only plays (no account) get attributed to the invite instead of a
+// user.
+export const anonymousListens = sqliteTable("anonymous_listens", {
+  id: text("id").primaryKey(),
+  inviteToken: text("invite_token")
+    .notNull()
+    .references(() => invites.token, { onDelete: "cascade" }),
+  trackId: text("track_id")
+    .notNull()
+    .references(() => tracks.id, { onDelete: "cascade" }),
+  listenedAt: integer("listened_at", { mode: "timestamp_ms" })
+    .default(sql`(cast(unixepoch('subsecond') * 1000 as integer))`)
+    .notNull(),
+});
+
 // Not in the original data model — needed to compute "unread comments"
 // per release per viewer without re-deriving it from scratch each time.
 export const releaseViews = sqliteTable(

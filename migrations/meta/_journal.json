@@ -36,6 +36,13 @@
       "when": 1784420878055,
       "tag": "0005_invites_no_expiry",
       "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "6",
+      "when": 1784477509710,
+      "tag": "0006_anon_listens",
+      "breakpoints": true
     }
   ]
 }

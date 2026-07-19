@@ -42,7 +42,8 @@ export function ListenActivity({ releaseId }: { releaseId: string }) {
             {data?.listens.map((l) => (
               <div key={l.id} className="flex items-center justify-between text-xs text-muted">
                 <span>
-                  <span className="text-cream">{l.name || l.email}</span> listened to{" "}
+                  <span className="text-cream">{l.name || l.email}</span>
+                  {l.anonymous && <span className="ml-1 text-dim">(link only)</span>} listened to{" "}
                   <span className="text-cream">{l.trackTitle}</span>
                 </span>
                 <span className="font-mono text-[10px] text-dim">{new Date(l.listenedAt).toLocaleString()}</span>

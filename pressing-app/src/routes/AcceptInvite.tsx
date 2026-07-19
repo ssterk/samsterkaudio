@@ -1,11 +1,15 @@
 import { useEffect, useState, type ReactNode } from "react";
 import { useParams } from "react-router-dom";
-import { api, type InviteInfo } from "../lib/api";
+import { api, type InviteInfo, type ReleaseDetail } from "../lib/api";
+import { Player } from "../components/Player";
 
 export function AcceptInvite() {
   const { token } = useParams<{ token: string }>();
   const [invite, setInvite] = useState<InviteInfo | "expired" | null>(null);
+  const [detail, setDetail] = useState<ReleaseDetail | null>(null);
+  const [activeTrackId, setActiveTrackId] = useState<string | null>(null);
   const [sent, setSent] = useState(false);
+  const [sending, setSending] = useState(false);
 
   useEffect(() => {
     if (!token) return;
@@ -13,12 +17,21 @@ export function AcceptInvite() {
       .invite(token)
       .then(setInvite)
       .catch(() => setInvite("expired"));
+    api
+      .inviteTracks(token)
+      .then(setDetail)
+      .catch(() => {});
   }, [token]);
 
-  async function handleSend() {
+  async function handleCreateAccount() {
     if (!token) return;
-    await api.requestMagicLink(token);
-    setSent(true);
+    setSending(true);
+    try {
+      await api.requestMagicLink(token);
+      setSent(true);
+    } finally {
+      setSending(false);
+    }
   }
 
   if (invite === null) return null;
@@ -27,44 +40,88 @@ export function AcceptInvite() {
     return (
       <Centered>
         <div className="font-display text-3xl font-black text-dim">
-          INVITE NOT FOUND OR EXPIRED
+          LINK NOT FOUND OR NO LONGER AVAILABLE
         </div>
         <StudioFooter />
       </Centered>
     );
   }
 
+  const activeTrack = detail?.tracks.find((t) => t.id === activeTrackId) ?? detail?.tracks[0];
+  const activeVersion = activeTrack && (activeTrack.versions.find((v) => v.active) ?? activeTrack.versions[0]);
+
   return (
-    <Centered>
-      <div className="mb-4 text-[11px] tracking-[0.32em] text-muted">
-        YOU'VE BEEN INVITED TO LISTEN
-      </div>
-      <div className="mb-2 font-display text-5xl font-black">
-        {invite.release?.title ?? "a release"}
-      </div>
-      <div className="mb-10 text-sm tracking-wide text-muted">
-        {invite.release?.artist}
-      </div>
-      {sent ? (
-        <div className="max-w-[340px] text-center text-sm tracking-wide text-cream">
-          Check {invite.email} for a sign-in link.
+    <div className="mx-auto flex min-h-screen max-w-[720px] flex-col px-6 pb-16 pt-16">
+      <div className="mb-8 text-center">
+        <div className="mb-3 text-[11px] tracking-[0.32em] text-accent">
+          A PRIVATE MIX FROM SAM STERK AUDIO
         </div>
-      ) : (
-        <button
-          onClick={handleSend}
-          className="cursor-pointer border-none bg-accent px-6 py-3.5 font-display text-lg font-black tracking-[0.1em] text-bg hover:bg-accent-hover"
-        >
-          SEND ME A SIGN-IN LINK
-        </button>
+        <div className="font-display text-5xl font-black leading-none">
+          {invite.release?.title ?? "Untitled"}
+        </div>
+        <div className="mt-2 text-sm tracking-wide text-muted">{invite.release?.artist}</div>
+      </div>
+
+      {token && activeTrack && activeVersion && (
+        <div className="mb-2">
+          <Player
+            track={activeTrack}
+            streamUrl={api.inviteStreamUrl(token, activeVersion.id)}
+            peaksUrl={api.invitePeaksUrl(token, activeVersion.id)}
+            onFirstPlay={() => api.logAnonymousListen(token, activeTrack.id).catch(() => {})}
+          />
+        </div>
       )}
+
+      {detail && detail.tracks.length > 1 && (
+        <div className="mb-10 mt-4 flex flex-col gap-1">
+          {detail.tracks.map((track) => (
+            <div
+              key={track.id}
+              onClick={() => setActiveTrackId(track.id)}
+              className={`cursor-pointer border px-4 py-2.5 text-sm ${
+                (activeTrack?.id ?? detail.tracks[0]?.id) === track.id
+                  ? "border-accent text-cream"
+                  : "border-line text-muted hover:border-muted"
+              }`}
+            >
+              <span className="mr-3 font-mono text-xs text-dim">{track.position}</span>
+              {track.title}
+            </div>
+          ))}
+        </div>
+      )}
+
+      <div className="mt-auto border-t border-line pt-8 text-center">
+        {sent ? (
+          <div className="text-sm tracking-wide text-cream">
+            Check {invite.email} for a sign-in link.
+          </div>
+        ) : (
+          <>
+            <div className="mb-3 text-xs tracking-wide text-muted">
+              Working on more than one project with Sam? Create an account to see everything
+              he's shared with you in one place.
+            </div>
+            <button
+              onClick={handleCreateAccount}
+              disabled={sending}
+              className="cursor-pointer border border-line bg-transparent px-6 py-3 font-display text-sm font-bold tracking-[0.14em] text-cream hover:border-accent hover:text-accent disabled:opacity-60"
+            >
+              {sending ? "SENDING…" : "CREATE AN ACCOUNT"}
+            </button>
+          </>
+        )}
+      </div>
+
       <StudioFooter />
-    </Centered>
+    </div>
   );
 }
 
 function StudioFooter() {
   return (
-    <div className="mt-20 flex flex-col items-center gap-3 border-t border-line pt-8">
+    <div className="mt-10 flex flex-col items-center gap-3 pt-4">
       <a
         href="https://samsterkaudio.com"
         target="_blank"

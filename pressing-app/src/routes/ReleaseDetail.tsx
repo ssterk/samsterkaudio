@@ -97,7 +97,17 @@ export function ReleaseDetail() {
 
       {activeTrack && (
         <div className="mb-8">
-          <Player ref={playerRef} track={activeTrack} />
+          <Player
+            ref={playerRef}
+            track={activeTrack}
+            streamUrl={api.streamUrl(
+              (activeTrack.versions.find((v) => v.active) ?? activeTrack.versions[0])?.id ?? "",
+            )}
+            peaksUrl={api.peaksUrl(
+              (activeTrack.versions.find((v) => v.active) ?? activeTrack.versions[0])?.id ?? "",
+            )}
+            onFirstPlay={() => api.logListen(activeTrack.id).catch(() => {})}
+          />
         </div>
       )}
 

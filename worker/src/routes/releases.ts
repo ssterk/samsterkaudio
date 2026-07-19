@@ -1,6 +1,6 @@
 import { Hono } from "hono";
 import { drizzle } from "drizzle-orm/d1";
-import { eq, asc, desc, and, gt, ne, inArray } from "drizzle-orm";
+import { eq, asc, and, gt, ne, inArray } from "drizzle-orm";
 import * as schema from "../db/schema";
 import type { Env } from "../env";
 import type { AppVariables } from "../middleware";
@@ -242,16 +242,34 @@ releases.get("/:id/listens", async (c) => {
     })
     .from(schema.listens)
     .innerJoin(schema.user, eq(schema.user.id, schema.listens.userId))
-    .where(inArray(schema.listens.trackId, trackIds))
-    .orderBy(desc(schema.listens.listenedAt));
+    .where(inArray(schema.listens.trackId, trackIds));
+
+  // Link-only plays with no account — attributed to the invite's email
+  // rather than a user.
+  const anonListenRows = await db
+    .select({
+      id: schema.anonymousListens.id,
+      trackId: schema.anonymousListens.trackId,
+      listenedAt: schema.anonymousListens.listenedAt,
+      email: schema.invites.email,
+    })
+    .from(schema.anonymousListens)
+    .innerJoin(schema.invites, eq(schema.invites.token, schema.anonymousListens.inviteToken))
+    .where(inArray(schema.anonymousListens.trackId, trackIds));
+
+  type ListenRow = { id: string; trackId: string; listenedAt: Date; email: string; name: string | null; anonymous: boolean };
+  const allListens: ListenRow[] = [
+    ...listenRows.map((r) => ({ ...r, anonymous: false })),
+    ...anonListenRows.map((r) => ({ ...r, name: null, anonymous: true })),
+  ].sort((a, b) => b.listenedAt.getTime() - a.listenedAt.getTime());
 
   const playCounts: Record<string, number> = {};
-  for (const row of listenRows) {
+  for (const row of allListens) {
     playCounts[row.trackId] = (playCounts[row.trackId] ?? 0) + 1;
   }
 
   return c.json({
-    listens: listenRows.map((r) => ({ ...r, trackTitle: trackTitles.get(r.trackId) ?? "" })),
+    listens: allListens.map((r) => ({ ...r, trackTitle: trackTitles.get(r.trackId) ?? "" })),
     playCounts,
   });
 });

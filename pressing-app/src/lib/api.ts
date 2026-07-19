@@ -89,8 +89,11 @@ export type ListenEvent = {
   trackTitle: string;
   listenedAt: string;
   email: string;
-  name: string;
+  name: string | null;
+  anonymous: boolean;
 };
+
+export type PendingInvite = { token: string; email: string; url: string };
 
 export const api = {
   releases: () => request<{ releases: Release[] }>("/releases"),
@@ -160,4 +163,14 @@ export const api = {
     request<{ releaseId: string }>(`/invites/${token}/accept`, {
       method: "POST",
     }),
+  // Public, token-scoped — no login. This is what lets a shared link play
+  // immediately instead of gating on email/magic-link first.
+  inviteTracks: (token: string) => request<ReleaseDetail>(`/invites/${token}/tracks`),
+  inviteStreamUrl: (token: string, versionId: string) => `${BASE}/invites/${token}/stream/${versionId}`,
+  invitePeaksUrl: (token: string, versionId: string) => `${BASE}/invites/${token}/stream/${versionId}/peaks`,
+  logAnonymousListen: (token: string, trackId: string) =>
+    request<{ ok: boolean }>(`/invites/${token}/listen`, { method: "POST", body: JSON.stringify({ trackId }) }),
+  pendingInvites: (releaseId: string) =>
+    request<{ invites: PendingInvite[] }>(`/invites/for-release/${releaseId}`),
+  revokeInvite: (token: string) => request<{ ok: boolean }>(`/invites/${token}/revoke`, { method: "POST" }),
 };

@@ -24,6 +24,9 @@ export function Login() {
 
   return (
     <div className="flex min-h-screen flex-col items-center justify-center p-10">
+      <div className="mb-6 font-display text-sm font-bold tracking-[0.28em] text-cream">
+        SAM STERK<span className="text-accent">&nbsp;AUDIO</span>
+      </div>
       <div className="mb-7 flex items-center gap-6">
         <Reel duration="9s" />
         <Reel duration="6s" />
