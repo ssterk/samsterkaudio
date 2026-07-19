@@ -4,7 +4,7 @@ import { api, type AccessEntry, type PendingInvite } from "../lib/api";
 export function SharePanel({ releaseId, onClose }: { releaseId: string; onClose: () => void }) {
   const [access, setAccess] = useState<AccessEntry[] | null>(null);
   const [pending, setPending] = useState<PendingInvite[] | null>(null);
-  const [email, setEmail] = useState("");
+  const [name, setName] = useState("");
   const [inviting, setInviting] = useState(false);
   const [copiedToken, setCopiedToken] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -20,8 +20,8 @@ export function SharePanel({ releaseId, onClose }: { releaseId: string; onClose:
     setInviting(true);
     setError(null);
     try {
-      await api.createInvite(email, releaseId);
-      setEmail("");
+      await api.createInvite(name, releaseId);
+      setName("");
       load();
     } catch (err) {
       setError((err as Error).message);
@@ -34,6 +34,13 @@ export function SharePanel({ releaseId, onClose }: { releaseId: string; onClose:
     navigator.clipboard.writeText(url);
     setCopiedToken(token);
     setTimeout(() => setCopiedToken(null), 2000);
+  }
+
+  function textLink(url: string) {
+    // sms: URI scheme — opens the Messages app with the link prefilled on
+    // iOS/Android; harmlessly does nothing on desktop browsers that don't
+    // register a handler for it.
+    window.location.href = `sms:&body=${encodeURIComponent(url)}`;
   }
 
   return (
@@ -50,18 +57,18 @@ export function SharePanel({ releaseId, onClose }: { releaseId: string; onClose:
         </div>
 
         <div className="mb-6 text-xs leading-relaxed tracking-wide text-muted">
-          Anyone with a link below can play immediately — no login required. The email is just a
-          label so you remember who it's for; if they want persistent access to everything you've
-          shared with them, they can create an account from the link.
+          Anyone with a link below can play immediately — no login required. Text it, email it,
+          whatever's easiest. If they want persistent access to everything you've shared with
+          them, they can create an account from the link (using their own email, not one you set
+          up front).
         </div>
 
         <form onSubmit={handleInvite} className="mb-2 flex gap-2">
           <input
-            type="email"
             required
-            placeholder="WHO'S THIS FOR? (LABEL ONLY)"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
+            placeholder="WHO'S THIS FOR? (E.G. JAKE)"
+            value={name}
+            onChange={(e) => setName(e.target.value)}
             className="flex-1 border border-line bg-bg px-3 py-2.5 text-sm text-cream placeholder:text-dim focus:outline focus:outline-1 focus:outline-accent"
           />
           <button
@@ -79,7 +86,7 @@ export function SharePanel({ releaseId, onClose }: { releaseId: string; onClose:
           {pending?.map((inv) => (
             <div key={inv.token} className="border border-line bg-bg p-2.5">
               <div className="mb-1.5 flex items-center justify-between">
-                <div className="text-xs text-muted">{inv.email}</div>
+                <div className="text-xs text-muted">{inv.name || "(unnamed)"}</div>
                 <button
                   onClick={() => api.revokeInvite(inv.token).then(load)}
                   className="cursor-pointer border-none bg-transparent text-xs text-dim hover:text-accent"
@@ -94,6 +101,12 @@ export function SharePanel({ releaseId, onClose }: { releaseId: string; onClose:
                   onFocus={(e) => e.target.select()}
                   className="flex-1 border border-line bg-bg2 px-2.5 py-2 font-mono text-xs text-cream"
                 />
+                <button
+                  onClick={() => textLink(inv.url)}
+                  className="cursor-pointer border border-line bg-transparent px-3 font-display text-xs font-bold tracking-[0.1em] text-cream hover:border-muted"
+                >
+                  TEXT
+                </button>
                 <button
                   onClick={() => copyLink(inv.token, inv.url)}
                   className="cursor-pointer border border-line bg-transparent px-3 font-display text-xs font-bold tracking-[0.1em] text-cream hover:border-muted"

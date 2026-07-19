@@ -1,4 +1,4 @@
-import { useEffect, useState, type ReactNode } from "react";
+import { useEffect, useState, type FormEvent, type ReactNode } from "react";
 import { useParams } from "react-router-dom";
 import { api, type InviteInfo, type ReleaseDetail } from "../lib/api";
 import { Player } from "../components/Player";
@@ -8,7 +8,9 @@ export function AcceptInvite() {
   const [invite, setInvite] = useState<InviteInfo | "expired" | null>(null);
   const [detail, setDetail] = useState<ReleaseDetail | null>(null);
   const [activeTrackId, setActiveTrackId] = useState<string | null>(null);
-  const [sent, setSent] = useState(false);
+  const [showEmailForm, setShowEmailForm] = useState(false);
+  const [email, setEmail] = useState("");
+  const [sentTo, setSentTo] = useState<string | null>(null);
   const [sending, setSending] = useState(false);
 
   useEffect(() => {
@@ -23,12 +25,13 @@ export function AcceptInvite() {
       .catch(() => {});
   }, [token]);
 
-  async function handleCreateAccount() {
+  async function handleCreateAccount(e: FormEvent) {
+    e.preventDefault();
     if (!token) return;
     setSending(true);
     try {
-      await api.requestMagicLink(token);
-      setSent(true);
+      await api.requestMagicLink(token, email);
+      setSentTo(email);
     } finally {
       setSending(false);
     }
@@ -93,10 +96,27 @@ export function AcceptInvite() {
       )}
 
       <div className="mt-auto border-t border-line pt-8 text-center">
-        {sent ? (
-          <div className="text-sm tracking-wide text-cream">
-            Check {invite.email} for a sign-in link.
-          </div>
+        {sentTo ? (
+          <div className="text-sm tracking-wide text-cream">Check {sentTo} for a sign-in link.</div>
+        ) : showEmailForm ? (
+          <form onSubmit={handleCreateAccount} className="mx-auto flex max-w-[340px] gap-2">
+            <input
+              type="email"
+              required
+              autoFocus
+              placeholder="YOUR EMAIL"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              className="flex-1 border border-line bg-bg2 px-3 py-2.5 text-sm text-cream placeholder:text-dim focus:outline focus:outline-1 focus:outline-accent"
+            />
+            <button
+              type="submit"
+              disabled={sending}
+              className="cursor-pointer border-none bg-accent px-5 py-2.5 font-display text-sm font-black tracking-[0.1em] text-bg hover:bg-accent-hover disabled:opacity-60"
+            >
+              {sending ? "…" : "SEND"}
+            </button>
+          </form>
         ) : (
           <>
             <div className="mb-3 text-xs tracking-wide text-muted">
@@ -104,11 +124,10 @@ export function AcceptInvite() {
               he's shared with you in one place.
             </div>
             <button
-              onClick={handleCreateAccount}
-              disabled={sending}
-              className="cursor-pointer border border-line bg-transparent px-6 py-3 font-display text-sm font-bold tracking-[0.14em] text-cream hover:border-accent hover:text-accent disabled:opacity-60"
+              onClick={() => setShowEmailForm(true)}
+              className="cursor-pointer border border-line bg-transparent px-6 py-3 font-display text-sm font-bold tracking-[0.14em] text-cream hover:border-accent hover:text-accent"
             >
-              {sending ? "SENDING…" : "CREATE AN ACCOUNT"}
+              CREATE AN ACCOUNT
             </button>
           </>
         )}

@@ -53,7 +53,7 @@ export type ReleaseDetail = {
 };
 
 export type InviteInfo = {
-  email: string;
+  name: string | null;
   release: { title: string; artist: string; type: string } | null;
 };
 
@@ -88,12 +88,12 @@ export type ListenEvent = {
   trackId: string;
   trackTitle: string;
   listenedAt: string;
-  email: string;
+  email?: string;
   name: string | null;
   anonymous: boolean;
 };
 
-export type PendingInvite = { token: string; email: string; url: string };
+export type PendingInvite = { token: string; name: string | null; email: string | null; url: string };
 
 export const api = {
   releases: () => request<{ releases: Release[] }>("/releases"),
@@ -138,10 +138,10 @@ export const api = {
   releaseAccess: (releaseId: string) => request<{ access: AccessEntry[] }>(`/releases/${releaseId}/access`),
   revokeAccess: (releaseId: string, userId: string) =>
     request<{ ok: boolean }>(`/releases/${releaseId}/access/${userId}`, { method: "DELETE" }),
-  createInvite: (email: string, releaseId: string) =>
+  createInvite: (name: string, releaseId: string) =>
     request<{ token: string; url: string }>("/invites", {
       method: "POST",
-      body: JSON.stringify({ email, releaseId }),
+      body: JSON.stringify({ name, releaseId }),
     }),
   releaseListens: (releaseId: string) =>
     request<{ listens: ListenEvent[]; playCounts: Record<string, number> }>(`/releases/${releaseId}/listens`),
@@ -155,9 +155,10 @@ export const api = {
     request<{ ok: boolean }>(`/comments/${commentId}`, { method: "PATCH", body: JSON.stringify({ resolved }) }),
   deleteComment: (commentId: string) => request<{ ok: boolean }>(`/comments/${commentId}`, { method: "DELETE" }),
   invite: (token: string) => request<InviteInfo>(`/invites/${token}`),
-  requestMagicLink: (token: string) =>
+  requestMagicLink: (token: string, email: string) =>
     request<{ sent: boolean }>(`/invites/${token}/request-magic-link`, {
       method: "POST",
+      body: JSON.stringify({ email }),
     }),
   acceptInvite: (token: string) =>
     request<{ releaseId: string }>(`/invites/${token}/accept`, {

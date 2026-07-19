@@ -244,23 +244,23 @@ releases.get("/:id/listens", async (c) => {
     .innerJoin(schema.user, eq(schema.user.id, schema.listens.userId))
     .where(inArray(schema.listens.trackId, trackIds));
 
-  // Link-only plays with no account — attributed to the invite's email
-  // rather than a user.
+  // Link-only plays with no account — attributed to the invite's label
+  // (name) rather than a user.
   const anonListenRows = await db
     .select({
       id: schema.anonymousListens.id,
       trackId: schema.anonymousListens.trackId,
       listenedAt: schema.anonymousListens.listenedAt,
-      email: schema.invites.email,
+      name: schema.invites.name,
     })
     .from(schema.anonymousListens)
     .innerJoin(schema.invites, eq(schema.invites.token, schema.anonymousListens.inviteToken))
     .where(inArray(schema.anonymousListens.trackId, trackIds));
 
-  type ListenRow = { id: string; trackId: string; listenedAt: Date; email: string; name: string | null; anonymous: boolean };
+  type ListenRow = { id: string; trackId: string; listenedAt: Date; name: string | null; anonymous: boolean };
   const allListens: ListenRow[] = [
     ...listenRows.map((r) => ({ ...r, anonymous: false })),
-    ...anonListenRows.map((r) => ({ ...r, name: null, anonymous: true })),
+    ...anonListenRows.map((r) => ({ ...r, anonymous: true })),
   ].sort((a, b) => b.listenedAt.getTime() - a.listenedAt.getTime());
 
   const playCounts: Record<string, number> = {};

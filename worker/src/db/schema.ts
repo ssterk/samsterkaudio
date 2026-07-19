@@ -36,6 +36,13 @@ export const releaseAccess = sqliteTable(
 
 export const invites = sqliteTable("invites", {
   token: text("token").primaryKey(),
+  // A label the owner picks at creation ("Jake", "Mixing client X") — no
+  // email needed to make a shareable link anymore. `email` stays NOT NULL
+  // at the DB level (changing that requires a table-recreation migration
+  // that's proven unreliable against remote D1 — see git history) but is
+  // just an empty string until the visitor supplies their own email via
+  // the optional "create an account" step.
+  name: text("name"),
   email: text("email").notNull(),
   releaseId: text("release_id")
     .notNull()

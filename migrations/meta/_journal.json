@@ -43,6 +43,13 @@
       "when": 1784477509710,
       "tag": "0006_anon_listens",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "6",
+      "when": 1784478875325,
+      "tag": "0007_invite_name",
+      "breakpoints": true
     }
   ]
 }

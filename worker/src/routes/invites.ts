@@ -30,7 +30,9 @@ function isLive(invite: { expiresAt: Date | null }) {
 // `eq()` calls elsewhere in this file to `never`. `.use()` sidesteps it.
 invites.use("/", requireAuth, requireOwner);
 invites.post("/", async (c) => {
-  const body = await c.req.json<{ email: string; releaseId: string }>();
+  const body = await c.req.json<{ name: string; releaseId: string }>();
+  if (!body.name?.trim()) return c.json({ error: "name is required" }, 400);
+
   const db = drizzle(c.env.DB, { schema });
 
   const [release] = await db
@@ -42,7 +44,8 @@ invites.post("/", async (c) => {
   const token = crypto.randomUUID();
   await db.insert(schema.invites).values({
     token,
-    email: body.email,
+    name: body.name.trim(),
+    email: "", // set later if/when the visitor creates an account
     releaseId: body.releaseId,
   });
 
@@ -67,7 +70,8 @@ invites.get("/for-release/:releaseId", async (c) => {
   return c.json({
     invites: rows.map((inv) => ({
       token: inv.token,
-      email: inv.email,
+      name: inv.name,
+      email: inv.email || null,
       url: `${c.env.BETTER_AUTH_URL}/pressing/invite/${inv.token}`,
     })),
   });
@@ -104,7 +108,7 @@ invites.get("/:token", async (c) => {
     .where(eq(schema.releases.id, invite.releaseId));
 
   return c.json({
-    email: invite.email,
+    name: invite.name,
     release: release
       ? { title: release.title, artist: release.artist, type: release.type }
       : null,
@@ -237,9 +241,9 @@ invites.post("/:token/listen", async (c) => {
   return c.json({ ok: true }, 201);
 });
 
-// Public: triggers a real better-auth magic-link sign-in for the invite's
-// email. Clicking that link is what actually proves email ownership and
-// creates the session — the invite token alone never does.
+// Public: the visitor supplies their own email here (the owner never has to
+// know it up front) — this is what actually proves email ownership via a
+// real better-auth magic-link sign-in. The invite token alone never does.
 invites.post("/:token/request-magic-link", async (c) => {
   const db = drizzle(c.env.DB, { schema });
   const token = c.req.param("token");
@@ -252,11 +256,19 @@ invites.post("/:token/request-magic-link", async (c) => {
     return c.json({ error: "invite not found or expired" }, 410);
   }
 
+  const body = await c.req.json<{ email: string }>();
+  const email = body.email?.trim().toLowerCase();
+  if (!email || !email.includes("@")) {
+    return c.json({ error: "a valid email is required" }, 400);
+  }
+
+  await db.update(schema.invites).set({ email }).where(eq(schema.invites.token, token));
+
   const auth = createAuth(c.env);
   await auth.api.signInMagicLink({
     headers: c.req.raw.headers,
     body: {
-      email: invite.email,
+      email,
       callbackURL: `/pressing/invite/${token}/complete`,
     },
   });
