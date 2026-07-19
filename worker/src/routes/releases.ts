@@ -1,6 +1,6 @@
 import { Hono } from "hono";
 import { drizzle } from "drizzle-orm/d1";
-import { eq, asc } from "drizzle-orm";
+import { eq, asc, desc, and, gt, ne, inArray } from "drizzle-orm";
 import * as schema from "../db/schema";
 import type { Env } from "../env";
 import type { AppVariables } from "../middleware";
@@ -35,7 +35,40 @@ releases.get("/", async (c) => {
           )
           .where(eq(schema.releaseAccess.userId, session.user.id));
 
-  return c.json({ releases: rows });
+  // Unread comment count per release: comments from other people, created
+  // after this user's last visit to that release (or ever, if never visited).
+  const releasesWithUnread = [];
+  for (const release of rows) {
+    const [view] = await db
+      .select()
+      .from(schema.releaseViews)
+      .where(and(eq(schema.releaseViews.releaseId, release.id), eq(schema.releaseViews.userId, session.user.id)));
+    const since = view?.lastViewedAt ?? new Date(0);
+
+    const trackRows = await db
+      .select({ id: schema.tracks.id })
+      .from(schema.tracks)
+      .where(eq(schema.tracks.releaseId, release.id));
+    const trackIds = trackRows.map((t) => t.id);
+
+    let unreadCount = 0;
+    if (trackIds.length > 0) {
+      const unread = await db
+        .select({ id: schema.comments.id })
+        .from(schema.comments)
+        .where(
+          and(
+            inArray(schema.comments.trackId, trackIds),
+            gt(schema.comments.createdAt, since),
+            ne(schema.comments.userId, session.user.id),
+          ),
+        );
+      unreadCount = unread.length;
+    }
+    releasesWithUnread.push({ ...release, unreadCount });
+  }
+
+  return c.json({ releases: releasesWithUnread });
 });
 
 releases.use("/", requireOwner);
@@ -132,4 +165,107 @@ releases.post("/:id/tracks", async (c) => {
   });
 
   return c.json({ trackId, versionId, uploadUrl: `/api/pressing/track-versions/${versionId}/upload` }, 201);
+});
+
+// Marks a release "read" for unread-comment-count purposes.
+releases.use("/:id/view", requireAuth);
+releases.post("/:id/view", async (c) => {
+  const session = c.get("session");
+  const id = c.req.param("id");
+  if (!(await hasReleaseAccess(c.env, session.user, id))) return c.json({ error: "not found" }, 404);
+
+  const db = drizzle(c.env.DB, { schema });
+  await db
+    .insert(schema.releaseViews)
+    .values({ releaseId: id, userId: session.user.id, lastViewedAt: new Date() })
+    .onConflictDoUpdate({
+      target: [schema.releaseViews.releaseId, schema.releaseViews.userId],
+      set: { lastViewedAt: new Date() },
+    });
+
+  return c.json({ ok: true });
+});
+
+// Who currently has access to this release, for the share panel.
+releases.use("/:id/access", requireAuth, requireOwner);
+releases.get("/:id/access", async (c) => {
+  const releaseId = c.req.param("id");
+  const db = drizzle(c.env.DB, { schema });
+  const rows = await db
+    .select({
+      userId: schema.releaseAccess.userId,
+      canDownload: schema.releaseAccess.canDownload,
+      email: schema.user.email,
+      name: schema.user.name,
+    })
+    .from(schema.releaseAccess)
+    .innerJoin(schema.user, eq(schema.user.id, schema.releaseAccess.userId))
+    .where(eq(schema.releaseAccess.releaseId, releaseId));
+
+  return c.json({ access: rows });
+});
+
+releases.use("/:id/access/:userId", requireAuth, requireOwner);
+releases.patch("/:id/access/:userId", async (c) => {
+  const releaseId = c.req.param("id");
+  const userId = c.req.param("userId");
+  const body = await c.req.json<{ canDownload: boolean }>();
+
+  const db = drizzle(c.env.DB, { schema });
+  await db
+    .update(schema.releaseAccess)
+    .set({ canDownload: body.canDownload })
+    .where(and(eq(schema.releaseAccess.releaseId, releaseId), eq(schema.releaseAccess.userId, userId)));
+
+  return c.json({ ok: true });
+});
+releases.delete("/:id/access/:userId", async (c) => {
+  const releaseId = c.req.param("id");
+  const userId = c.req.param("userId");
+
+  const db = drizzle(c.env.DB, { schema });
+  await db
+    .delete(schema.releaseAccess)
+    .where(and(eq(schema.releaseAccess.releaseId, releaseId), eq(schema.releaseAccess.userId, userId)));
+
+  return c.json({ ok: true });
+});
+
+// Listen activity for the owner: who played what, when, and how often.
+releases.use("/:id/listens", requireAuth, requireOwner);
+releases.get("/:id/listens", async (c) => {
+  const releaseId = c.req.param("id");
+  const db = drizzle(c.env.DB, { schema });
+
+  const trackRows = await db
+    .select({ id: schema.tracks.id, title: schema.tracks.title })
+    .from(schema.tracks)
+    .where(eq(schema.tracks.releaseId, releaseId));
+  const trackTitles = new Map(trackRows.map((t) => [t.id, t.title]));
+  const trackIds = trackRows.map((t) => t.id);
+
+  if (trackIds.length === 0) return c.json({ listens: [], playCounts: {} });
+
+  const listenRows = await db
+    .select({
+      id: schema.listens.id,
+      trackId: schema.listens.trackId,
+      listenedAt: schema.listens.listenedAt,
+      email: schema.user.email,
+      name: schema.user.name,
+    })
+    .from(schema.listens)
+    .innerJoin(schema.user, eq(schema.user.id, schema.listens.userId))
+    .where(inArray(schema.listens.trackId, trackIds))
+    .orderBy(desc(schema.listens.listenedAt));
+
+  const playCounts: Record<string, number> = {};
+  for (const row of listenRows) {
+    playCounts[row.trackId] = (playCounts[row.trackId] ?? 0) + 1;
+  }
+
+  return c.json({
+    listens: listenRows.map((r) => ({ ...r, trackTitle: trackTitles.get(r.trackId) ?? "" })),
+    playCounts,
+  });
 });

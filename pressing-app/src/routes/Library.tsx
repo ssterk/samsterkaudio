@@ -132,6 +132,11 @@ export function Library() {
                 <div className="font-display text-7xl font-black tracking-[0.05em] text-cream/85">
                   {release.title.slice(0, 2).toUpperCase()}
                 </div>
+                {!!release.unreadCount && (
+                  <div className="absolute right-2.5 top-2.5 bg-accent px-2 py-0.5 font-mono text-[11px] font-medium text-bg">
+                    {release.unreadCount} NEW
+                  </div>
+                )}
               </div>
               <div className="p-4">
                 <div className="font-display text-2xl font-black tracking-[0.03em]">

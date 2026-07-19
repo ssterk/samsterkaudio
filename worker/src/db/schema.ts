@@ -97,3 +97,52 @@ export const dropboxTokens = sqliteTable("dropbox_tokens", {
     .default(sql`(cast(unixepoch('subsecond') * 1000 as integer))`)
     .notNull(),
 });
+
+// parentId is a plain column, not an FK — one level of nesting only, and
+// SQLite self-reference FKs add drizzle typing complexity not worth it here.
+export const comments = sqliteTable("comments", {
+  id: text("id").primaryKey(),
+  trackId: text("track_id")
+    .notNull()
+    .references(() => tracks.id, { onDelete: "cascade" }),
+  versionId: text("version_id").references(() => trackVersions.id, { onDelete: "set null" }),
+  userId: text("user_id")
+    .notNull()
+    .references(() => user.id, { onDelete: "cascade" }),
+  timestampMs: integer("timestamp_ms"),
+  body: text("body").notNull(),
+  parentId: text("parent_id"),
+  resolved: integer("resolved", { mode: "boolean" }).notNull().default(false),
+  createdAt: integer("created_at", { mode: "timestamp_ms" })
+    .default(sql`(cast(unixepoch('subsecond') * 1000 as integer))`)
+    .notNull(),
+});
+
+export const listens = sqliteTable("listens", {
+  id: text("id").primaryKey(),
+  userId: text("user_id")
+    .notNull()
+    .references(() => user.id, { onDelete: "cascade" }),
+  trackId: text("track_id")
+    .notNull()
+    .references(() => tracks.id, { onDelete: "cascade" }),
+  listenedAt: integer("listened_at", { mode: "timestamp_ms" })
+    .default(sql`(cast(unixepoch('subsecond') * 1000 as integer))`)
+    .notNull(),
+});
+
+// Not in the original data model — needed to compute "unread comments"
+// per release per viewer without re-deriving it from scratch each time.
+export const releaseViews = sqliteTable(
+  "release_views",
+  {
+    releaseId: text("release_id")
+      .notNull()
+      .references(() => releases.id, { onDelete: "cascade" }),
+    userId: text("user_id")
+      .notNull()
+      .references(() => user.id, { onDelete: "cascade" }),
+    lastViewedAt: integer("last_viewed_at", { mode: "timestamp_ms" }).notNull(),
+  },
+  (table) => [primaryKey({ columns: [table.releaseId, table.userId] })],
+);

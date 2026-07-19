@@ -1,20 +1,37 @@
-import { useEffect, useRef, useState } from "react";
+import { forwardRef, useEffect, useImperativeHandle, useRef, useState } from "react";
 import { Waveform } from "./Waveform";
 import { api, type Track } from "../lib/api";
 import { formatDuration } from "../lib/format";
 
-export function Player({ track }: { track: Track }) {
+export type PlayerHandle = {
+  seekTo: (seconds: number) => void;
+  getCurrentTime: () => number;
+};
+
+export const Player = forwardRef<PlayerHandle, { track: Track }>(function Player({ track }, ref) {
   const activeVersion = track.versions.find((v) => v.active) ?? track.versions[0];
   const audioRef = useRef<HTMLAudioElement>(null);
+  const loggedListenRef = useRef(false);
   const [peaks, setPeaks] = useState<number[] | null>(null);
   const [playing, setPlaying] = useState(false);
   const [progress, setProgress] = useState(0);
   const [currentTime, setCurrentTime] = useState(0);
 
+  useImperativeHandle(ref, () => ({
+    seekTo: (seconds: number) => {
+      const audio = audioRef.current;
+      if (!audio) return;
+      audio.currentTime = seconds;
+      audio.play();
+    },
+    getCurrentTime: () => audioRef.current?.currentTime ?? 0,
+  }));
+
   useEffect(() => {
     setPeaks(null);
     setProgress(0);
     setPlaying(false);
+    loggedListenRef.current = false;
     if (!activeVersion || activeVersion.status !== "ready") return;
     fetch(api.peaksUrl(activeVersion.id), { credentials: "include" })
       .then((r) => r.json())
@@ -27,6 +44,16 @@ export function Player({ track }: { track: Track }) {
     if (!audio) return;
     if (playing) audio.pause();
     else audio.play();
+  }
+
+  function handlePlay() {
+    setPlaying(true);
+    // Once per track per time it's loaded into the player — not once per
+    // play/pause toggle within the same listening session.
+    if (!loggedListenRef.current) {
+      loggedListenRef.current = true;
+      api.logListen(track.id).catch(() => {});
+    }
   }
 
   function handleSeek(fraction: number) {
@@ -73,11 +100,11 @@ export function Player({ track }: { track: Track }) {
         ref={audioRef}
         src={api.streamUrl(activeVersion.id)}
         preload="metadata"
-        onPlay={() => setPlaying(true)}
+        onPlay={handlePlay}
         onPause={() => setPlaying(false)}
         onTimeUpdate={handleTimeUpdate}
         onEnded={() => setPlaying(false)}
       />
     </div>
   );
-}
+});

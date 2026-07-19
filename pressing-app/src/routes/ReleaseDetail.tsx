@@ -1,8 +1,11 @@
-import { useCallback, useEffect, useState, type DragEvent } from "react";
+import { useCallback, useEffect, useRef, useState, type DragEvent } from "react";
 import { useParams } from "react-router-dom";
 import { api, type ReleaseDetail as ReleaseDetailType } from "../lib/api";
 import { useSession } from "../lib/auth-client";
-import { Player } from "../components/Player";
+import { Player, type PlayerHandle } from "../components/Player";
+import { Comments } from "../components/Comments";
+import { SharePanel } from "../components/SharePanel";
+import { ListenActivity } from "../components/ListenActivity";
 import { formatDuration } from "../lib/format";
 
 export function ReleaseDetail() {
@@ -14,6 +17,8 @@ export function ReleaseDetail() {
   const [activeTrackId, setActiveTrackId] = useState<string | null>(null);
   const [dragOver, setDragOver] = useState(false);
   const [uploading, setUploading] = useState<Record<string, number>>({});
+  const [shareOpen, setShareOpen] = useState(false);
+  const playerRef = useRef<PlayerHandle>(null);
 
   const load = useCallback(() => {
     if (!id) return;
@@ -23,6 +28,10 @@ export function ReleaseDetail() {
   useEffect(() => {
     load();
   }, [load]);
+
+  useEffect(() => {
+    if (id) api.markReleaseViewed(id).catch(() => {});
+  }, [id]);
 
   // Poll while anything is still being processed by the queue consumer.
   useEffect(() => {
@@ -66,19 +75,29 @@ export function ReleaseDetail() {
 
   return (
     <div className="mx-auto max-w-[1180px] px-9 pb-[150px] pt-9">
-      <div className="mb-8">
-        <div className="inline-block border border-accent px-2.5 py-0.5 font-display text-xs font-bold tracking-[0.14em] text-accent">
-          {detail.release.type.toUpperCase()}
+      <div className="mb-8 flex items-start justify-between gap-5">
+        <div>
+          <div className="inline-block border border-accent px-2.5 py-0.5 font-display text-xs font-bold tracking-[0.14em] text-accent">
+            {detail.release.type.toUpperCase()}
+          </div>
+          <div className="mt-3 font-display text-6xl font-black leading-none tracking-[0.02em]">
+            {detail.release.title}
+          </div>
+          <div className="mt-1 text-sm tracking-wide text-muted">{detail.release.artist}</div>
         </div>
-        <div className="mt-3 font-display text-6xl font-black leading-none tracking-[0.02em]">
-          {detail.release.title}
-        </div>
-        <div className="mt-1 text-sm tracking-wide text-muted">{detail.release.artist}</div>
+        {isOwner && (
+          <button
+            onClick={() => setShareOpen(true)}
+            className="cursor-pointer border border-line bg-transparent px-6 py-3 font-display text-sm font-bold tracking-[0.1em] text-cream hover:border-muted"
+          >
+            SHARE
+          </button>
+        )}
       </div>
 
       {activeTrack && (
         <div className="mb-8">
-          <Player track={activeTrack} />
+          <Player ref={playerRef} track={activeTrack} />
         </div>
       )}
 
@@ -123,7 +142,7 @@ export function ReleaseDetail() {
           }}
           onDragLeave={() => setDragOver(false)}
           onDrop={handleDrop}
-          className={`border border-dashed px-8 py-14 text-center ${dragOver ? "border-accent" : "border-line"}`}
+          className={`mb-8 border border-dashed px-8 py-14 text-center ${dragOver ? "border-accent" : "border-line"}`}
         >
           <div className="font-display text-xl font-black tracking-[0.05em] text-dim">
             DROP WAV / AIFF FILES HERE
@@ -145,6 +164,16 @@ export function ReleaseDetail() {
           ))}
         </div>
       )}
+
+      {isOwner && (
+        <div className="mb-8">
+          <ListenActivity releaseId={detail.release.id} />
+        </div>
+      )}
+
+      {activeTrack && <Comments trackId={activeTrack.id} playerRef={playerRef} />}
+
+      {shareOpen && <SharePanel releaseId={detail.release.id} onClose={() => setShareOpen(false)} />}
     </div>
   );
 }

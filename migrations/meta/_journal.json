@@ -22,6 +22,13 @@
       "when": 1784418274605,
       "tag": "0003_dropbox",
       "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "6",
+      "when": 1784419838888,
+      "tag": "0004_comments",
+      "breakpoints": true
     }
   ]
 }

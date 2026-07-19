@@ -20,6 +20,7 @@ export type Release = {
   type: "single" | "ep" | "lp";
   artworkKey: string | null;
   createdAt: string;
+  unreadCount?: number;
 };
 
 export type TrackVersion = {
@@ -65,6 +66,32 @@ export type DropboxBrowseResult = {
   artworkCandidate: DropboxFile | null;
 };
 
+export type AccessEntry = { userId: string; email: string; name: string; canDownload: boolean };
+
+export type Comment = {
+  id: string;
+  trackId: string;
+  versionId: string | null;
+  userId: string;
+  timestampMs: number | null;
+  body: string;
+  parentId: string | null;
+  resolved: boolean;
+  createdAt: string;
+  authorName: string;
+  authorEmail: string;
+  authorRole: string;
+};
+
+export type ListenEvent = {
+  id: string;
+  trackId: string;
+  trackTitle: string;
+  listenedAt: string;
+  email: string;
+  name: string;
+};
+
 export const api = {
   releases: () => request<{ releases: Release[] }>("/releases"),
   createRelease: (body: { title: string; artist: string; type: "single" | "ep" | "lp" }) =>
@@ -103,6 +130,32 @@ export const api = {
     tracks: { name: string; path: string }[];
     artworkPath?: string;
   }) => request<{ releaseId: string }>("/dropbox/import", { method: "POST", body: JSON.stringify(body) }),
+  markReleaseViewed: (releaseId: string) =>
+    request<{ ok: boolean }>(`/releases/${releaseId}/view`, { method: "POST" }),
+  releaseAccess: (releaseId: string) => request<{ access: AccessEntry[] }>(`/releases/${releaseId}/access`),
+  updateAccess: (releaseId: string, userId: string, canDownload: boolean) =>
+    request<{ ok: boolean }>(`/releases/${releaseId}/access/${userId}`, {
+      method: "PATCH",
+      body: JSON.stringify({ canDownload }),
+    }),
+  revokeAccess: (releaseId: string, userId: string) =>
+    request<{ ok: boolean }>(`/releases/${releaseId}/access/${userId}`, { method: "DELETE" }),
+  createInvite: (email: string, releaseId: string) =>
+    request<{ token: string; url: string }>("/invites", {
+      method: "POST",
+      body: JSON.stringify({ email, releaseId }),
+    }),
+  releaseListens: (releaseId: string) =>
+    request<{ listens: ListenEvent[]; playCounts: Record<string, number> }>(`/releases/${releaseId}/listens`),
+  logListen: (trackId: string) => request<{ ok: boolean }>(`/tracks/${trackId}/listen`, { method: "POST" }),
+  comments: (trackId: string) => request<{ comments: Comment[] }>(`/tracks/${trackId}/comments`),
+  createComment: (
+    trackId: string,
+    body: { body: string; timestampMs?: number; parentId?: string; versionId?: string },
+  ) => request<{ id: string }>(`/tracks/${trackId}/comments`, { method: "POST", body: JSON.stringify(body) }),
+  resolveComment: (commentId: string, resolved: boolean) =>
+    request<{ ok: boolean }>(`/comments/${commentId}`, { method: "PATCH", body: JSON.stringify({ resolved }) }),
+  deleteComment: (commentId: string) => request<{ ok: boolean }>(`/comments/${commentId}`, { method: "DELETE" }),
   invite: (token: string) => request<InviteInfo>(`/invites/${token}`),
   requestMagicLink: (token: string) =>
     request<{ sent: boolean }>(`/invites/${token}/request-magic-link`, {
