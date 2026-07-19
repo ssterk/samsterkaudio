@@ -1,6 +1,7 @@
 import { betterAuth } from "better-auth";
 import { drizzleAdapter } from "better-auth/adapters/drizzle";
 import { magicLink } from "better-auth/plugins";
+import { expo } from "@better-auth/expo";
 import { drizzle } from "drizzle-orm/d1";
 import type { Env } from "./env";
 // Only the auth tables, not the full app schema: passing app tables (e.g.
@@ -17,6 +18,9 @@ export function createAuth(env: Env) {
     basePath: "/api/pressing/auth",
     secret: env.BETTER_AUTH_SECRET,
     baseURL: env.BETTER_AUTH_URL,
+    // "pressing://" is the personal iOS app's URL scheme (mobile/app.json) —
+    // needed so better-auth trusts deep-link redirects back into the app.
+    trustedOrigins: ["pressing://"],
     emailAndPassword: {
       enabled: true,
       // Only the owner signs up with a password; listeners only ever arrive
@@ -43,6 +47,9 @@ export function createAuth(env: Env) {
           console.log(`[pressing] magic link for ${email}: ${url}`);
         },
       }),
+      // Bridges cookie-based web sessions to a header-based token the iOS
+      // app can store in SecureStore — see mobile/src/lib/auth-client.ts.
+      expo(),
     ],
     advanced: {
       database: {

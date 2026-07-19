@@ -4,6 +4,7 @@
 import { betterAuth } from "better-auth";
 import { drizzleAdapter } from "better-auth/adapters/drizzle";
 import { magicLink } from "better-auth/plugins";
+import { expo } from "@better-auth/expo";
 import { drizzle } from "drizzle-orm/d1";
 import * as authSchema from "./db/auth-schema";
 
@@ -31,5 +32,6 @@ export const auth = betterAuth({
     magicLink({
       sendMagicLink: async () => {},
     }),
+    expo(),
   ],
 });
