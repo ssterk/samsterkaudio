@@ -276,8 +276,12 @@ invites.post("/:token/request-magic-link", async (c) => {
   return c.json({ sent: true });
 });
 
-// Requires a session established by the magic link above; only grants access
-// if the signed-in email matches the invite's email exactly.
+// Requires a session — established either via the web's magic-link flow
+// above (which sets invite.email first) or the mobile app's email-code
+// sign-in (see mobile/src/lib/auth-client.ts), which never sets it
+// separately. So: an unclaimed invite (email still "") is claimed by
+// whoever accepts it first, signed in as whatever email they used; a
+// claimed invite only accepts that same email again.
 invites.use("/:token/accept", requireAuth);
 invites.post("/:token/accept", async (c) => {
   const db = drizzle(c.env.DB, { schema });
@@ -291,7 +295,7 @@ invites.post("/:token/accept", async (c) => {
   if (!invite || !isLive(invite)) {
     return c.json({ error: "invite not found or expired" }, 410);
   }
-  if (invite.email.toLowerCase() !== session.user.email.toLowerCase()) {
+  if (invite.email && invite.email.toLowerCase() !== session.user.email.toLowerCase()) {
     return c.json({ error: "this invite was issued to a different email" }, 403);
   }
 
@@ -302,7 +306,7 @@ invites.post("/:token/accept", async (c) => {
 
   await db
     .update(schema.invites)
-    .set({ usedAt: new Date() })
+    .set({ usedAt: new Date(), email: invite.email || session.user.email.toLowerCase() })
     .where(eq(schema.invites.token, token));
 
   return c.json({ releaseId: invite.releaseId });

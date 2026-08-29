@@ -77,6 +77,11 @@ export type Comment = {
   authorRole: string;
 };
 
+export type InviteInfo = {
+  name: string | null;
+  release: { title: string; artist: string; type: string } | null;
+};
+
 export const api = {
   releases: () => request<{ releases: Release[] }>("/releases"),
   release: (id: string) => request<ReleaseDetail>(`/releases/${id}`),
@@ -88,4 +93,30 @@ export const api = {
   comments: (trackId: string) => request<{ comments: Comment[] }>(`/tracks/${trackId}/comments`),
   createComment: (trackId: string, body: { body: string; timestampMs?: number; parentId?: string }) =>
     request<{ id: string }>(`/tracks/${trackId}/comments`, { method: "POST", body: JSON.stringify(body) }),
+
+  // Public, token-scoped — no login, no auth headers. This is what lets a
+  // Universal Link tap play immediately instead of gating on sign-in first,
+  // matching the web AcceptInvite flow exactly.
+  invite: (token: string) =>
+    fetch(`${BASE}/invites/${token}`).then((r) => {
+      if (!r.ok) throw new Error("invite not found or expired");
+      return r.json() as Promise<InviteInfo>;
+    }),
+  inviteTracks: (token: string) =>
+    fetch(`${BASE}/invites/${token}/tracks`).then((r) => {
+      if (!r.ok) throw new Error("invite not found or expired");
+      return r.json() as Promise<ReleaseDetail>;
+    }),
+  inviteStreamUrl: (token: string, versionId: string) => `${BASE}/invites/${token}/stream/${versionId}`,
+  invitePeaksUrl: (token: string, versionId: string) => `${BASE}/invites/${token}/stream/${versionId}/peaks`,
+  logAnonymousListen: (token: string, trackId: string) =>
+    fetch(`${BASE}/invites/${token}/listen`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ trackId }),
+    }),
+  // Requires a session (established via email-code sign-in) — grants
+  // release_access for this invite once signed in with the matching email.
+  acceptInvite: (token: string) =>
+    request<{ releaseId: string }>(`/invites/${token}/accept`, { method: "POST" }),
 };

@@ -15,7 +15,10 @@
         "UIBackgroundModes": [
           "audio"
         ]
-      }
+      },
+      "associatedDomains": [
+        "applinks:samsterkaudio.com"
+      ]
     },
     "android": {
       "package": "com.samsterkaudio.pressing",

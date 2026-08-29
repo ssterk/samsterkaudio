@@ -3,7 +3,7 @@
 // which this must be kept in sync with.
 import { betterAuth } from "better-auth";
 import { drizzleAdapter } from "better-auth/adapters/drizzle";
-import { magicLink } from "better-auth/plugins";
+import { magicLink, emailOTP } from "better-auth/plugins";
 import { expo } from "@better-auth/expo";
 import { drizzle } from "drizzle-orm/d1";
 import * as authSchema from "./db/auth-schema";
@@ -27,10 +27,16 @@ export const auth = betterAuth({
         input: false,
       },
     },
+    deleteUser: {
+      enabled: true,
+    },
   },
   plugins: [
     magicLink({
       sendMagicLink: async () => {},
+    }),
+    emailOTP({
+      sendVerificationOTP: async () => {},
     }),
     expo(),
   ],

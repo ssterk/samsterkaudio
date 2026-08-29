@@ -1,9 +1,10 @@
 import { betterAuth } from "better-auth";
 import { drizzleAdapter } from "better-auth/adapters/drizzle";
-import { magicLink } from "better-auth/plugins";
+import { magicLink, emailOTP } from "better-auth/plugins";
 import { expo } from "@better-auth/expo";
 import { drizzle } from "drizzle-orm/d1";
 import type { Env } from "./env";
+import { cleanupUserData } from "./account-deletion";
 // Only the auth tables, not the full app schema: passing app tables (e.g.
 // invites.token) into the adapter's schema confuses better-auth's type-level
 // field mapping and produces unrelated "never" errors on drizzle queries
@@ -36,6 +37,17 @@ export function createAuth(env: Env) {
           input: false,
         },
       },
+      // Apple requires in-app account deletion for any app that supports
+      // account creation (guideline 5.1.1(v)). No email confirmation step
+      // (no email provider is wired up — see the magicLink TODO below), so
+      // this deletes immediately when called; the mobile app gates it behind
+      // its own confirmation UI.
+      deleteUser: {
+        enabled: true,
+        afterDelete: async (user) => {
+          await cleanupUserData(env, user.id);
+        },
+      },
     },
     plugins: [
       magicLink({
@@ -45,6 +57,18 @@ export function createAuth(env: Env) {
           // hook this up to Resend or a Cloudflare Email Workers send binding
           // before listener invites go out for real.
           console.log(`[pressing] magic link for ${email}: ${url}`);
+        },
+      }),
+      // Used by the mobile app instead of magicLink: a tapped email link
+      // hands the session to whatever browser/mail context opened it, not
+      // the app's own SecureStore-backed cookie storage, so there's no clean
+      // way to get a session into the app from a link tap. A code the user
+      // types back into the app sidesteps that entirely — it's a normal
+      // same-origin API call the app's own fetch client already captures.
+      emailOTP({
+        sendVerificationOTP: async ({ email, otp }) => {
+          // TODO(Phase 5 / email provider): same as sendMagicLink above.
+          console.log(`[pressing] sign-in code for ${email}: ${otp}`);
         },
       }),
       // Bridges cookie-based web sessions to a header-based token the iOS

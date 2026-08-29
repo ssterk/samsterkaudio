@@ -33,6 +33,25 @@ app.route("/api/pressing/dropbox", dropbox);
 app.route("/api/pressing/tracks", tracks);
 app.route("/api/pressing/comments", comments);
 
+// Universal Links: lets tapping a shared invite link open the installed iOS
+// app directly instead of Safari (falls back to the web page otherwise).
+// Static, public info (Team IDs aren't secret — they're in every provisioning
+// profile) — no env var needed, just fill in the real value once known.
+// TODO: replace "TEAMID" with the real 10-character Apple Developer Team ID.
+app.get("/.well-known/apple-app-site-association", (c) => {
+  return c.json({
+    applinks: {
+      apps: [],
+      details: [
+        {
+          appID: "TEAMID.com.samsterkaudio.pressing",
+          paths: ["/pressing/invite/*"],
+        },
+      ],
+    },
+  });
+});
+
 // Shared invite links get pasted into texts/Slack/group chats — this makes
 // the unfurled preview card itself branded (real release title/artist and
 // artwork) instead of the generic "Pressing" fallback in index.html, before

@@ -37,9 +37,14 @@ export function LibraryScreen({ navigation }: Props) {
           </Text>
           <Text style={styles.title}>LIBRARY</Text>
         </View>
-        <TouchableOpacity onPress={() => signOut()}>
-          <Text style={styles.signOut}>SIGN OUT</Text>
-        </TouchableOpacity>
+        <View style={{ flexDirection: "row", alignItems: "center", gap: 16 }}>
+          <TouchableOpacity onPress={() => navigation.navigate("Account")}>
+            <Text style={styles.signOut}>ACCOUNT</Text>
+          </TouchableOpacity>
+          <TouchableOpacity onPress={() => signOut()}>
+            <Text style={styles.signOut}>SIGN OUT</Text>
+          </TouchableOpacity>
+        </View>
       </View>
 
       <FlatList

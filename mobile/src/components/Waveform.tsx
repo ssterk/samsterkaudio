@@ -1,6 +1,5 @@
 import { useEffect, useState } from "react";
 import { View, Pressable, StyleSheet, type GestureResponderEvent, type LayoutChangeEvent } from "react-native";
-import { api, authHeaders } from "../lib/api";
 import { colors } from "../lib/theme";
 
 const BAR_COUNT = 120; // downsampled from the ~2000-bucket peaks JSON — 2000 raw Views would be sluggish on-device
@@ -20,24 +19,31 @@ function downsample(peaks: number[], count: number): number[] {
 }
 
 export function Waveform({
-  versionId,
+  peaksUrl,
+  headers,
   progress,
   onSeek,
+  markers,
+  onSeekToMarker,
 }: {
-  versionId: string;
+  peaksUrl: string;
+  headers?: Record<string, string>;
   progress: number;
   onSeek: (fraction: number) => void;
+  /** Comment positions as fractions (0–1) of the track's duration, pinned on the waveform. */
+  markers?: number[];
+  onSeekToMarker?: (fraction: number) => void;
 }) {
   const [bars, setBars] = useState<number[] | null>(null);
   const [width, setWidth] = useState(0);
 
   useEffect(() => {
     setBars(null);
-    fetch(api.peaksUrl(versionId), { headers: authHeaders() })
+    fetch(peaksUrl, { headers })
       .then((r) => r.json())
       .then((peaks: number[]) => setBars(downsample(peaks, BAR_COUNT)))
       .catch(() => setBars(null));
-  }, [versionId]);
+  }, [peaksUrl]);
 
   function handlePress(e: GestureResponderEvent) {
     if (!width) return;
@@ -54,20 +60,34 @@ export function Waveform({
   const playedBars = Math.floor(progress * bars.length);
 
   return (
-    <Pressable style={styles.container} onPress={handlePress} onLayout={handleLayout}>
-      {bars.map((amp, i) => (
-        <View
-          key={i}
-          style={[
-            styles.bar,
-            {
-              height: `${Math.max(amp, 0.02) * 100}%`,
-              backgroundColor: i < playedBars ? colors.accent : "rgba(242,234,217,0.25)",
-            },
-          ]}
-        />
-      ))}
-    </Pressable>
+    <View>
+      <Pressable style={styles.container} onPress={handlePress} onLayout={handleLayout}>
+        {bars.map((amp, i) => (
+          <View
+            key={i}
+            style={[
+              styles.bar,
+              {
+                height: `${Math.max(amp, 0.02) * 100}%`,
+                backgroundColor: i < playedBars ? colors.accent : "rgba(242,234,217,0.25)",
+              },
+            ]}
+          />
+        ))}
+      </Pressable>
+      {!!width &&
+        markers?.map((fraction, i) => (
+          <Pressable
+            key={i}
+            style={[styles.markerHit, { left: fraction * width - 9 }]}
+            onPress={() => onSeekToMarker?.(fraction)}
+            hitSlop={6}
+          >
+            <View style={styles.markerPin} />
+            <View style={styles.markerStem} />
+          </Pressable>
+        ))}
+    </View>
   );
 }
 
@@ -80,4 +100,20 @@ const styles = StyleSheet.create({
     gap: 1.5,
   },
   bar: { flex: 1, minHeight: 2 },
+  markerHit: {
+    position: "absolute",
+    top: 0,
+    width: 18,
+    height: 80,
+    alignItems: "center",
+  },
+  markerPin: {
+    width: 8,
+    height: 8,
+    borderRadius: 4,
+    backgroundColor: colors.cream,
+    borderWidth: 1.5,
+    borderColor: colors.bg,
+  },
+  markerStem: { width: 1.5, flex: 1, backgroundColor: colors.cream, opacity: 0.6 },
 });

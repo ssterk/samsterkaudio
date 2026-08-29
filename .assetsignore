@@ -24,5 +24,18 @@ PLAN.md
 worker
 pressing-app
 
+# mobile app source + native build artifacts (ios/, android/, Pods/) — a
+# separate toolchain entirely (EAS/Xcode, not wrangler), never meant to be
+# served as a static asset. ios/ and android/ are gitignored but still exist
+# on disk after `expo run:ios`, and are large enough to break asset uploads
+# outright (a single Pods artifact alone exceeds the 25MiB per-file limit).
+mobile
+
 # D1 schema/migrations — internal, not public
 migrations
+
+# Unexplained nested clone of this same repo (has its own .git, stuck at an
+# old commit) — not something this session created. Excluded defensively so
+# it can never be served as a static asset; flagged to the user separately
+# rather than deleted, since its origin isn't understood.
+samsterkaudio
