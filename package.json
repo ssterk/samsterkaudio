@@ -21,8 +21,7 @@
   },
   "homepage": "https://github.com/ssterk/samsterkaudio#readme",
   "devDependencies": {
-    "@better-auth/cli": "^1.4.21",
-    "@cloudflare/workers-types": "^4.20260702.1",
+    "@cloudflare/workers-types": "^5.20260829.1",
     "@tailwindcss/vite": "^4.3.3",
     "@types/react": "^19.2.17",
     "@types/react-dom": "^19.2.3",
@@ -31,15 +30,15 @@
     "tailwindcss": "^4.3.3",
     "typescript": "^7.0.2",
     "vite": "^8.1.5",
-    "wrangler": "^4.103.0"
+    "wrangler": "^4.127.1"
   },
   "dependencies": {
-    "@better-auth/expo": "^1.6.23",
-    "better-auth": "^1.6.23",
+    "@better-auth/expo": "^1.7.2",
+    "better-auth": "^1.7.2",
     "drizzle-orm": "^0.45.2",
-    "hono": "^4.12.30",
+    "hono": "^4.13.5",
     "react": "^19.2.7",
     "react-dom": "^19.2.7",
-    "react-router-dom": "^7.18.1"
+    "react-router-dom": "^7.18.3"
   }
 }
