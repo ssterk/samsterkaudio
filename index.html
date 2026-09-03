@@ -1150,5 +1150,43 @@
       }
     });
   </script>
+  <script>
+    const spotifyCredits = {
+      "Beach Chapel — Swim": "https://open.spotify.com/album/2pzkrr0UV1XEhx9ffCB4wF",
+      "Beach Chapel — Sweet Water": "https://open.spotify.com/album/2PzD3F054KiWRj6GldNPwR",
+      "Township — Impact Bliss": "https://open.spotify.com/album/2UlXwUYDtspCzb6CcX231W",
+      "Beach Chapel — Jerusalem": "https://open.spotify.com/album/2e0jdTU0Oc6mHe2J1DAkgl",
+      "Brian McMaster — Losing Time": "https://open.spotify.com/album/3XGsxaJ6ASOBG6ZuZWKEcH",
+      "communitypool — All We Had Was Time": "https://open.spotify.com/track/5Vfpv0MAdmmjKV1KC9vGFt",
+      "Shane Sheridan — Summer '19": "https://open.spotify.com/album/2F3EMFPaPbOjDFSNdSQd3z",
+      "Kadri Williams — On My Mind": "https://open.spotify.com/album/4EsttPxkR5wDlDANbVqzqQ",
+      "ILIFF JAMIESON — Savior Complex": "https://open.spotify.com/album/77LSBD8GIBd20ddoGsRQQm",
+      "Victus — EP 1": "https://open.spotify.com/album/3EzmqTTl8W0WSMf5DWbJuw",
+      "Donna Drive — Find Some Meaning": "https://open.spotify.com/album/6B1Zf5VFOBD2wK2pjNcDMJ",
+      "BEACH W — Holes in Your Hands": "https://open.spotify.com/album/1DypO41XkffuPCONqHW635",
+      "The Washups — Leaving": "https://open.spotify.com/album/4n005a4jxInXfTutQksWzA",
+      "Township — Everlong": "https://open.spotify.com/track/1Agqqd5RxET28dXgclnrHg",
+      "Dan Collins and a Piano — Leo": "https://open.spotify.com/album/0mBbQSrtmDEzbpPHJoCmz5",
+      "Hopeful. — Shipwrecked": "https://open.spotify.com/album/4GRXe9v5QODhSDuzT8JgD4",
+      "Brian McMaster — War": "https://open.spotify.com/album/2UBBzWCJOW3b1ToZ8yffNU",
+      "Beach Chapel — Family": "https://open.spotify.com/album/1A73egmKaxhUDQj0Pix3H8",
+      "LVTE — Free": "https://open.spotify.com/album/2e0IbfxF2IhS8Hc8gG38Lu",
+      "Randy James — Still Matter.": "https://open.spotify.com/album/2Pt5mG73M7ydCbhkf00TLK",
+      "Anthem Worship — New Heart": "https://open.spotify.com/album/3c2ryFUaPcq9Gr1cZtKR6Z",
+      "All Others — Sustaining": "https://open.spotify.com/album/1WJN6g6MeGaiYmnTdvuPSi"
+    };
+
+    document.querySelectorAll('.credit-tile').forEach(tile => {
+      const url = spotifyCredits[tile.querySelector('img')?.alt];
+      if (!url || tile.parentElement.tagName === 'A') return;
+      const link = document.createElement('a');
+      link.href = url;
+      link.target = '_blank';
+      link.rel = 'noopener noreferrer';
+      link.className = 'credit-tile';
+      tile.replaceWith(link);
+      link.append(...tile.childNodes);
+    });
+  </script>
 </body>
 </html>
