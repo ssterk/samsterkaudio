@@ -4,10 +4,45 @@ import { eq, asc } from "drizzle-orm";
 import * as schema from "../db/schema";
 import type { Env } from "../env";
 import type { AppVariables } from "../middleware";
-import { requireAuth } from "../middleware";
+import { requireAuth, requireOwner } from "../middleware";
 import { hasReleaseAccess } from "../access";
 
 export const tracks = new Hono<{ Bindings: Env; Variables: AppVariables }>();
+
+// Adds a new version to an existing track (A/B-able revisions — e.g. a
+// remaster or a client-requested mix pass) rather than creating a whole new
+// track. Same shape as releases.ts's "/:id/tracks" (which creates a track's
+// first version implicitly) — this is the same operation for track N+1.
+tracks.use("/:id/versions", requireAuth, requireOwner);
+tracks.post("/:id/versions", async (c) => {
+  const trackId = c.req.param("id");
+  const body = await c.req.json<{ filename: string; label?: string }>();
+  if (!body.filename) return c.json({ error: "filename is required" }, 400);
+
+  const db = drizzle(c.env.DB, { schema });
+  const [track] = await db.select().from(schema.tracks).where(eq(schema.tracks.id, trackId));
+  if (!track) return c.json({ error: "track not found" }, 404);
+
+  const existingVersions = await db
+    .select()
+    .from(schema.trackVersions)
+    .where(eq(schema.trackVersions.trackId, trackId));
+
+  const versionId = crypto.randomUUID();
+  const ext = (body.filename.match(/\.([^./]+)$/)?.[1] ?? "wav").toLowerCase();
+  const originalKey = `releases/${track.releaseId}/tracks/${trackId}/${versionId}.${ext}`;
+
+  await db.insert(schema.trackVersions).values({
+    id: versionId,
+    trackId,
+    label: body.label?.trim() || `v${existingVersions.length + 1}`,
+    originalKey,
+    status: "pending",
+    active: false,
+  });
+
+  return c.json({ versionId, uploadUrl: `/api/pressing/track-versions/${versionId}/upload` }, 201);
+});
 
 async function loadTrackWithAccess(c: { env: Env; get: (k: "session") => AppVariables["session"] }, trackId: string) {
   const db = drizzle(c.env.DB, { schema });

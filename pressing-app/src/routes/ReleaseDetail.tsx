@@ -6,6 +6,7 @@ import { Player, type PlayerHandle } from "../components/Player";
 import { Comments } from "../components/Comments";
 import { SharePanel } from "../components/SharePanel";
 import { ListenActivity } from "../components/ListenActivity";
+import { VersionBar } from "../components/VersionBar";
 import { formatDuration } from "../lib/format";
 
 export function ReleaseDetail() {
@@ -15,6 +16,7 @@ export function ReleaseDetail() {
 
   const [detail, setDetail] = useState<ReleaseDetailType | null>(null);
   const [activeTrackId, setActiveTrackId] = useState<string | null>(null);
+  const [selectedVersionByTrack, setSelectedVersionByTrack] = useState<Record<string, string>>({});
   const [dragOver, setDragOver] = useState(false);
   const [uploading, setUploading] = useState<Record<string, number>>({});
   const [shareOpen, setShareOpen] = useState(false);
@@ -69,9 +71,46 @@ export function ReleaseDetail() {
     if (e.dataTransfer.files.length) handleFiles(e.dataTransfer.files);
   }
 
+  async function handleAddVersion(trackId: string, file: File) {
+    const { versionId } = await api.createTrackVersion(trackId, file.name);
+    setUploading((u) => ({ ...u, [versionId]: 0 }));
+    try {
+      await api.uploadTrackVersion(versionId, file, (pct) => setUploading((u) => ({ ...u, [versionId]: pct })));
+      setSelectedVersionByTrack((s) => ({ ...s, [trackId]: versionId }));
+    } finally {
+      setUploading((u) => {
+        const next = { ...u };
+        delete next[versionId];
+        return next;
+      });
+      load();
+    }
+  }
+
+  async function handleActivateVersion(trackId: string, versionId: string) {
+    await api.activateTrackVersion(versionId);
+    load();
+  }
+
+  async function handleDeleteVersion(trackId: string, versionId: string) {
+    if (!confirm("Delete this version? This can't be undone.")) return;
+    await api.deleteTrackVersion(versionId);
+    setSelectedVersionByTrack((s) => {
+      const next = { ...s };
+      delete next[trackId];
+      return next;
+    });
+    load();
+  }
+
   if (!detail) return null;
 
   const activeTrack = detail.tracks.find((t) => t.id === activeTrackId) ?? detail.tracks[0];
+  const selectedVersion =
+    activeTrack &&
+    (activeTrack.versions.find((v) => v.id === selectedVersionByTrack[activeTrack.id]) ??
+      activeTrack.versions.find((v) => v.active) ??
+      activeTrack.versions[0]);
 
   return (
     <div className="mx-auto max-w-[1180px] px-9 pb-[150px] pt-9">
@@ -97,17 +136,32 @@ export function ReleaseDetail() {
 
       {activeTrack && (
         <div className="mb-8">
-          <Player
-            ref={playerRef}
+          <VersionBar
             track={activeTrack}
-            streamUrl={api.streamUrl(
-              (activeTrack.versions.find((v) => v.active) ?? activeTrack.versions[0])?.id ?? "",
-            )}
-            peaksUrl={api.peaksUrl(
-              (activeTrack.versions.find((v) => v.active) ?? activeTrack.versions[0])?.id ?? "",
-            )}
-            onFirstPlay={() => api.logListen(activeTrack.id).catch(() => {})}
+            selectedVersionId={selectedVersion?.id}
+            isOwner={isOwner}
+            onSelect={(versionId) => setSelectedVersionByTrack((s) => ({ ...s, [activeTrack.id]: versionId }))}
+            onUpload={(file) => handleAddVersion(activeTrack.id, file)}
+            onActivate={(versionId) => handleActivateVersion(activeTrack.id, versionId)}
+            onDelete={(versionId) => handleDeleteVersion(activeTrack.id, versionId)}
           />
+          {selectedVersion && (
+            <Player
+              ref={playerRef}
+              track={activeTrack}
+              streamUrl={api.streamUrl(selectedVersion.id)}
+              peaksUrl={api.peaksUrl(selectedVersion.id)}
+              onFirstPlay={() => api.logListen(activeTrack.id).catch(() => {})}
+            />
+          )}
+          {(isOwner || detail.canDownload) && selectedVersion?.status === "ready" && (
+            <a
+              href={api.downloadUrl(selectedVersion.id)}
+              className="mt-2 inline-block font-mono text-[10px] tracking-[0.1em] text-dim hover:text-accent"
+            >
+              ↓ DOWNLOAD {selectedVersion.label.toUpperCase()}
+            </a>
+          )}
         </div>
       )}
 

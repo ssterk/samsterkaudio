@@ -5,6 +5,7 @@ import { expo } from "@better-auth/expo";
 import { drizzle } from "drizzle-orm/d1";
 import type { Env } from "./env";
 import { cleanupUserData } from "./account-deletion";
+import { sendEmail } from "./email";
 // Only the auth tables, not the full app schema: passing app tables (e.g.
 // invites.token) into the adapter's schema confuses better-auth's type-level
 // field mapping and produces unrelated "never" errors on drizzle queries
@@ -52,11 +53,12 @@ export function createAuth(env: Env) {
     plugins: [
       magicLink({
         sendMagicLink: async ({ email, url }) => {
-          // TODO(Phase 5 / email provider): no email provider is wired up yet.
-          // For now the link is logged so invites are testable end-to-end;
-          // hook this up to Resend or a Cloudflare Email Workers send binding
-          // before listener invites go out for real.
-          console.log(`[pressing] magic link for ${email}: ${url}`);
+          await sendEmail(
+            env,
+            email,
+            "Your Pressing sign-in link",
+            `<p>Click below to sign in to Pressing.</p><p><a href="${url}">${url}</a></p><p>If you didn't request this, you can ignore it.</p>`,
+          );
         },
       }),
       // Used by the mobile app instead of magicLink: a tapped email link
@@ -67,8 +69,12 @@ export function createAuth(env: Env) {
       // same-origin API call the app's own fetch client already captures.
       emailOTP({
         sendVerificationOTP: async ({ email, otp }) => {
-          // TODO(Phase 5 / email provider): same as sendMagicLink above.
-          console.log(`[pressing] sign-in code for ${email}: ${otp}`);
+          await sendEmail(
+            env,
+            email,
+            "Your Pressing sign-in code",
+            `<p>Your sign-in code is <strong>${otp}</strong>. It expires shortly.</p>`,
+          );
         },
       }),
       // Bridges cookie-based web sessions to a header-based token the iOS

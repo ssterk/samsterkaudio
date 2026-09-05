@@ -3,3 +3,6 @@ BETTER_AUTH_URL=http://localhost:8787
 DROPBOX_APP_KEY=your-dropbox-app-key
 DROPBOX_APP_SECRET=your-dropbox-app-secret
 DROPBOX_TOKEN_ENCRYPTION_KEY=replace-with-a-random-64-char-hex-string
+# Optional — without this, magic-link/OTP emails just log to the console.
+RESEND_API_KEY=your-resend-api-key
+RESEND_FROM=Pressing <pressing@samsterkaudio.com>

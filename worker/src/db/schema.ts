@@ -50,6 +50,11 @@ export const invites = sqliteTable("invites", {
   // Null = never expires. Invites are still single-use (usedAt).
   expiresAt: integer("expires_at", { mode: "timestamp_ms" }),
   usedAt: integer("used_at", { mode: "timestamp_ms" }),
+  canDownload: integer("can_download", { mode: "boolean" }).default(false).notNull(),
+  // "<saltHex>:<sha256Hex>" — a share-link gate, not a login credential
+  // store, so a single salted SHA-256 round is proportionate (see
+  // worker/src/invite-password.ts). Null = link isn't password-protected.
+  passwordHash: text("password_hash"),
 });
 
 export const tracks = sqliteTable("tracks", {

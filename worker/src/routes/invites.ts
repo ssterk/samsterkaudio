@@ -1,4 +1,5 @@
-import { Hono } from "hono";
+import { Hono, type Context } from "hono";
+import { getCookie, setCookie } from "hono/cookie";
 import { drizzle } from "drizzle-orm/d1";
 import { eq, asc, and, isNull } from "drizzle-orm";
 import * as schema from "../db/schema";
@@ -7,8 +8,25 @@ import type { AppVariables } from "../middleware";
 import { requireAuth, requireOwner } from "../middleware";
 import { createAuth } from "../auth";
 import { serveMediaObject } from "../media-response";
+import { hashInvitePassword, verifyInvitePassword, signInviteUnlock, verifyInviteUnlock } from "../invite-password";
 
 export const invites = new Hono<{ Bindings: Env; Variables: AppVariables }>();
+
+function unlockCookieName(token: string) {
+  return `pi_unlock_${token}`;
+}
+
+// Password-protected invites gate everything that actually exposes audio
+// (tracks list, stream, peaks, download, listen logging) behind this — the
+// info lookup and artwork stay open so a locked link still unfurls nicely.
+async function requireUnlocked(
+  c: Context<{ Bindings: Env; Variables: AppVariables }>,
+  token: string,
+  invite: { passwordHash: string | null },
+): Promise<boolean> {
+  if (!invite.passwordHash) return true;
+  return verifyInviteUnlock(c.env.BETTER_AUTH_SECRET, token, getCookie(c, unlockCookieName(token)));
+}
 
 // Note: NOT gated on usedAt — the link is meant to keep working indefinitely
 // for anonymous playback even after someone's turned it into an account
@@ -30,7 +48,7 @@ function isLive(invite: { expiresAt: Date | null }) {
 // `eq()` calls elsewhere in this file to `never`. `.use()` sidesteps it.
 invites.use("/", requireAuth, requireOwner);
 invites.post("/", async (c) => {
-  const body = await c.req.json<{ name: string; releaseId: string }>();
+  const body = await c.req.json<{ name: string; releaseId: string; canDownload?: boolean; password?: string }>();
   if (!body.name?.trim()) return c.json({ error: "name is required" }, 400);
 
   const db = drizzle(c.env.DB, { schema });
@@ -47,6 +65,8 @@ invites.post("/", async (c) => {
     name: body.name.trim(),
     email: "", // set later if/when the visitor creates an account
     releaseId: body.releaseId,
+    canDownload: !!body.canDownload,
+    passwordHash: body.password?.trim() ? await hashInvitePassword(body.password.trim()) : null,
   });
 
   return c.json({
@@ -73,6 +93,8 @@ invites.get("/for-release/:releaseId", async (c) => {
       name: inv.name,
       email: inv.email || null,
       url: `${c.env.BETTER_AUTH_URL}/pressing/invite/${inv.token}`,
+      canDownload: inv.canDownload,
+      passwordProtected: !!inv.passwordHash,
     })),
   });
 });
@@ -112,7 +134,36 @@ invites.get("/:token", async (c) => {
     release: release
       ? { title: release.title, artist: release.artist, type: release.type }
       : null,
+    passwordProtected: !!invite.passwordHash,
+    unlocked: await requireUnlocked(c, token, invite),
   });
+});
+
+// Public: checks a submitted password against a protected invite and, on
+// success, sets a signed cookie so the rest of this invite's endpoints treat
+// the visitor as unlocked without re-checking the password every request.
+invites.post("/:token/unlock", async (c) => {
+  const token = c.req.param("token");
+  const db = drizzle(c.env.DB, { schema });
+
+  const [invite] = await db.select().from(schema.invites).where(eq(schema.invites.token, token));
+  if (!invite || !isLive(invite)) return c.json({ error: "invite not found or expired" }, 410);
+  if (!invite.passwordHash) return c.json({ ok: true });
+
+  const body = await c.req.json<{ password: string }>();
+  if (!(await verifyInvitePassword(body.password ?? "", invite.passwordHash))) {
+    return c.json({ error: "incorrect password" }, 401);
+  }
+
+  setCookie(c, unlockCookieName(token), await signInviteUnlock(c.env.BETTER_AUTH_SECRET, token), {
+    httpOnly: true,
+    secure: true,
+    sameSite: "Lax",
+    path: `/api/pressing/invites/${token}`,
+    maxAge: 60 * 60 * 24 * 30,
+  });
+
+  return c.json({ ok: true });
 });
 
 // Public: serves the release's artwork so shared invite links unfurl with a
@@ -157,6 +208,9 @@ invites.get("/:token/tracks", async (c) => {
   if (!invite || !isLive(invite)) {
     return c.json({ error: "invite not found or expired" }, 410);
   }
+  if (!(await requireUnlocked(c, token, invite))) {
+    return c.json({ error: "password required" }, 401);
+  }
 
   const [release] = await db.select().from(schema.releases).where(eq(schema.releases.id, invite.releaseId));
   if (!release) return c.json({ error: "not found" }, 404);
@@ -176,47 +230,67 @@ invites.get("/:token/tracks", async (c) => {
     tracks.push({ ...track, versions: versionRows });
   }
 
-  return c.json({ release, tracks });
+  return c.json({ release, tracks, canDownload: invite.canDownload });
 });
 
-async function loadStreamableVersion(env: Env, token: string, versionId: string) {
-  const db = drizzle(env.DB, { schema });
+async function loadStreamableVersion(
+  c: Context<{ Bindings: Env; Variables: AppVariables }>,
+  token: string,
+  versionId: string,
+) {
+  const db = drizzle(c.env.DB, { schema });
   const [invite] = await db.select().from(schema.invites).where(eq(schema.invites.token, token));
   if (!invite || !isLive(invite)) return null;
+  if (!(await requireUnlocked(c, token, invite))) return "locked" as const;
 
   const [row] = await db
-    .select({ version: schema.trackVersions, releaseId: schema.tracks.releaseId })
+    .select({ version: schema.trackVersions, releaseId: schema.tracks.releaseId, trackTitle: schema.tracks.title })
     .from(schema.trackVersions)
     .innerJoin(schema.tracks, eq(schema.tracks.id, schema.trackVersions.trackId))
     .where(eq(schema.trackVersions.id, versionId));
   if (!row || row.releaseId !== invite.releaseId) return null;
 
-  return row.version;
+  return { ...row, invite };
 }
 
 // Public: same Range-request streaming as the authenticated route, scoped
 // by invite token instead of a session — this is what lets a shared link
 // play without logging in.
 invites.get("/:token/stream/:versionId", async (c) => {
-  const version = await loadStreamableVersion(c.env, c.req.param("token"), c.req.param("versionId"));
-  if (!version) return c.json({ error: "not found" }, 404);
-  if (version.status !== "ready" || !version.streamKey) {
+  const row = await loadStreamableVersion(c, c.req.param("token"), c.req.param("versionId"));
+  if (row === "locked") return c.json({ error: "password required" }, 401);
+  if (!row) return c.json({ error: "not found" }, 404);
+  if (row.version.status !== "ready" || !row.version.streamKey) {
     return c.json({ error: "still processing" }, 425);
   }
-  return serveMediaObject(c.env, version.streamKey, c.req.header("Range") ?? null);
+  return serveMediaObject(c.env, row.version.streamKey, c.req.header("Range") ?? null);
 });
 
 invites.get("/:token/stream/:versionId/peaks", async (c) => {
-  const version = await loadStreamableVersion(c.env, c.req.param("token"), c.req.param("versionId"));
-  if (!version) return c.json({ error: "not found" }, 404);
-  if (!version.peaksKey) return c.json({ error: "still processing" }, 425);
+  const row = await loadStreamableVersion(c, c.req.param("token"), c.req.param("versionId"));
+  if (row === "locked") return c.json({ error: "password required" }, 401);
+  if (!row) return c.json({ error: "not found" }, 404);
+  if (!row.version.peaksKey) return c.json({ error: "still processing" }, 425);
 
-  const obj = await c.env.MEDIA.get(version.peaksKey);
+  const obj = await c.env.MEDIA.get(row.version.peaksKey);
   if (!obj || !obj.body) return c.json({ error: "not found" }, 404);
 
   return new Response(obj.body, {
     headers: { "Content-Type": "application/json", "Cache-Control": "private, max-age=86400" },
   });
+});
+
+// Public: download, gated on the invite's own canDownload flag rather than
+// an account's — a share link's download permission is a property of that
+// link, not of whoever happens to click it anonymously.
+invites.get("/:token/download/:versionId", async (c) => {
+  const row = await loadStreamableVersion(c, c.req.param("token"), c.req.param("versionId"));
+  if (row === "locked") return c.json({ error: "password required" }, 401);
+  if (!row) return c.json({ error: "not found" }, 404);
+  if (!row.invite.canDownload) return c.json({ error: "downloads not permitted for this link" }, 403);
+
+  const ext = row.version.originalKey.match(/\.([^./]+)$/)?.[1] ?? "wav";
+  return serveMediaObject(c.env, row.version.originalKey, null, "application/octet-stream", `${row.trackTitle} (${row.version.label}).${ext}`);
 });
 
 // Public: logs an anonymous (no-account) play against the invite rather
@@ -227,6 +301,7 @@ invites.post("/:token/listen", async (c) => {
 
   const [invite] = await db.select().from(schema.invites).where(eq(schema.invites.token, token));
   if (!invite || !isLive(invite)) return c.json({ error: "not found" }, 404);
+  if (!(await requireUnlocked(c, token, invite))) return c.json({ error: "password required" }, 401);
 
   const body = await c.req.json<{ trackId: string }>();
   const [track] = await db.select().from(schema.tracks).where(eq(schema.tracks.id, body.trackId));

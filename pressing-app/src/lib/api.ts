@@ -50,11 +50,14 @@ export type Track = {
 export type ReleaseDetail = {
   release: Release;
   tracks: Track[];
+  canDownload: boolean;
 };
 
 export type InviteInfo = {
   name: string | null;
   release: { title: string; artist: string; type: string } | null;
+  passwordProtected: boolean;
+  unlocked: boolean;
 };
 
 export type DropboxStatus = { connected: boolean; email: string | null };
@@ -66,7 +69,7 @@ export type DropboxBrowseResult = {
   artworkCandidate: DropboxFile | null;
 };
 
-export type AccessEntry = { userId: string; email: string; name: string };
+export type AccessEntry = { userId: string; email: string; name: string; canDownload: boolean };
 
 export type Comment = {
   id: string;
@@ -93,7 +96,14 @@ export type ListenEvent = {
   anonymous: boolean;
 };
 
-export type PendingInvite = { token: string; name: string | null; email: string | null; url: string };
+export type PendingInvite = {
+  token: string;
+  name: string | null;
+  email: string | null;
+  url: string;
+  canDownload: boolean;
+  passwordProtected: boolean;
+};
 
 export const api = {
   releases: () => request<{ releases: Release[] }>("/releases"),
@@ -105,6 +115,17 @@ export const api = {
       method: "POST",
       body: JSON.stringify({ filename }),
     }),
+  createTrackVersion: (trackId: string, filename: string) =>
+    request<{ versionId: string; uploadUrl: string }>(`/tracks/${trackId}/versions`, {
+      method: "POST",
+      body: JSON.stringify({ filename }),
+    }),
+  activateTrackVersion: (versionId: string) =>
+    request<{ ok: boolean }>(`/track-versions/${versionId}/activate`, { method: "POST" }),
+  deleteTrackVersion: (versionId: string) =>
+    request<{ ok: boolean }>(`/track-versions/${versionId}`, { method: "DELETE" }),
+  downloadUrl: (versionId: string) => `${BASE}/track-versions/${versionId}/download`,
+  inviteDownloadUrl: (token: string, versionId: string) => `${BASE}/invites/${token}/download/${versionId}`,
   uploadTrackVersion: async (versionId: string, file: File, onProgress?: (pct: number) => void) => {
     await new Promise<void>((resolve, reject) => {
       const xhr = new XMLHttpRequest();
@@ -138,10 +159,15 @@ export const api = {
   releaseAccess: (releaseId: string) => request<{ access: AccessEntry[] }>(`/releases/${releaseId}/access`),
   revokeAccess: (releaseId: string, userId: string) =>
     request<{ ok: boolean }>(`/releases/${releaseId}/access/${userId}`, { method: "DELETE" }),
-  createInvite: (name: string, releaseId: string) =>
+  setAccessDownload: (releaseId: string, userId: string, canDownload: boolean) =>
+    request<{ ok: boolean }>(`/releases/${releaseId}/access/${userId}`, {
+      method: "PATCH",
+      body: JSON.stringify({ canDownload }),
+    }),
+  createInvite: (name: string, releaseId: string, opts?: { canDownload?: boolean; password?: string }) =>
     request<{ token: string; url: string }>("/invites", {
       method: "POST",
-      body: JSON.stringify({ name, releaseId }),
+      body: JSON.stringify({ name, releaseId, ...opts }),
     }),
   releaseListens: (releaseId: string) =>
     request<{ listens: ListenEvent[]; playCounts: Record<string, number> }>(`/releases/${releaseId}/listens`),
@@ -155,6 +181,8 @@ export const api = {
     request<{ ok: boolean }>(`/comments/${commentId}`, { method: "PATCH", body: JSON.stringify({ resolved }) }),
   deleteComment: (commentId: string) => request<{ ok: boolean }>(`/comments/${commentId}`, { method: "DELETE" }),
   invite: (token: string) => request<InviteInfo>(`/invites/${token}`),
+  unlockInvite: (token: string, password: string) =>
+    request<{ ok: boolean }>(`/invites/${token}/unlock`, { method: "POST", body: JSON.stringify({ password }) }),
   requestMagicLink: (token: string, email: string) =>
     request<{ sent: boolean }>(`/invites/${token}/request-magic-link`, {
       method: "POST",

@@ -118,7 +118,16 @@ releases.get("/:id", async (c) => {
     tracks.push({ ...track, versions: versionRows });
   }
 
-  return c.json({ release, tracks });
+  let canDownload = session.user.role === "owner";
+  if (!canDownload) {
+    const [access] = await db
+      .select()
+      .from(schema.releaseAccess)
+      .where(and(eq(schema.releaseAccess.releaseId, id), eq(schema.releaseAccess.userId, session.user.id)));
+    canDownload = !!access?.canDownload;
+  }
+
+  return c.json({ release, tracks, canDownload });
 });
 
 releases.use("/:id/tracks", requireAuth, requireOwner);
@@ -196,6 +205,7 @@ releases.get("/:id/access", async (c) => {
       userId: schema.releaseAccess.userId,
       email: schema.user.email,
       name: schema.user.name,
+      canDownload: schema.releaseAccess.canDownload,
     })
     .from(schema.releaseAccess)
     .innerJoin(schema.user, eq(schema.user.id, schema.releaseAccess.userId))
@@ -205,6 +215,20 @@ releases.get("/:id/access", async (c) => {
 });
 
 releases.use("/:id/access/:userId", requireAuth, requireOwner);
+releases.patch("/:id/access/:userId", async (c) => {
+  const releaseId = c.req.param("id");
+  const userId = c.req.param("userId");
+  const body = await c.req.json<{ canDownload: boolean }>();
+
+  const db = drizzle(c.env.DB, { schema });
+  await db
+    .update(schema.releaseAccess)
+    .set({ canDownload: !!body.canDownload })
+    .where(and(eq(schema.releaseAccess.releaseId, releaseId), eq(schema.releaseAccess.userId, userId)));
+
+  return c.json({ ok: true });
+});
+
 releases.delete("/:id/access/:userId", async (c) => {
   const releaseId = c.req.param("id");
   const userId = c.req.param("userId");

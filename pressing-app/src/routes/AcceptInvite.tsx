@@ -2,27 +2,40 @@ import { useEffect, useState, type FormEvent, type ReactNode } from "react";
 import { useParams } from "react-router-dom";
 import { api, type InviteInfo, type ReleaseDetail } from "../lib/api";
 import { Player } from "../components/Player";
+import { VersionBar } from "../components/VersionBar";
 
 export function AcceptInvite() {
   const { token } = useParams<{ token: string }>();
   const [invite, setInvite] = useState<InviteInfo | "expired" | null>(null);
   const [detail, setDetail] = useState<ReleaseDetail | null>(null);
   const [activeTrackId, setActiveTrackId] = useState<string | null>(null);
+  const [selectedVersionByTrack, setSelectedVersionByTrack] = useState<Record<string, string>>({});
   const [showEmailForm, setShowEmailForm] = useState(false);
   const [email, setEmail] = useState("");
   const [sentTo, setSentTo] = useState<string | null>(null);
   const [sending, setSending] = useState(false);
+  const [passwordInput, setPasswordInput] = useState("");
+  const [unlockError, setUnlockError] = useState<string | null>(null);
+  const [unlocking, setUnlocking] = useState(false);
+
+  function loadTracks() {
+    if (!token) return;
+    api
+      .inviteTracks(token)
+      .then(setDetail)
+      .catch(() => {});
+  }
 
   useEffect(() => {
     if (!token) return;
     api
       .invite(token)
-      .then(setInvite)
+      .then((inv) => {
+        setInvite(inv);
+        if (inv.unlocked) loadTracks();
+      })
       .catch(() => setInvite("expired"));
-    api
-      .inviteTracks(token)
-      .then(setDetail)
-      .catch(() => {});
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [token]);
 
   async function handleCreateAccount(e: FormEvent) {
@@ -34,6 +47,22 @@ export function AcceptInvite() {
       setSentTo(email);
     } finally {
       setSending(false);
+    }
+  }
+
+  async function handleUnlock(e: FormEvent) {
+    e.preventDefault();
+    if (!token) return;
+    setUnlocking(true);
+    setUnlockError(null);
+    try {
+      await api.unlockInvite(token, passwordInput);
+      setInvite((inv) => (inv && inv !== "expired" ? { ...inv, unlocked: true } : inv));
+      loadTracks();
+    } catch (err) {
+      setUnlockError((err as Error).message);
+    } finally {
+      setUnlocking(false);
     }
   }
 
@@ -50,8 +79,41 @@ export function AcceptInvite() {
     );
   }
 
+  if (invite.passwordProtected && !invite.unlocked) {
+    return (
+      <Centered>
+        <div className="mb-2 text-[11px] tracking-[0.32em] text-accent">A PRIVATE MIX FROM SAM STERK AUDIO</div>
+        <div className="mb-6 font-display text-4xl font-black leading-none">{invite.release?.title ?? "Untitled"}</div>
+        <form onSubmit={handleUnlock} className="flex w-full max-w-[320px] flex-col gap-2">
+          <input
+            type="password"
+            autoFocus
+            required
+            placeholder="PASSWORD"
+            value={passwordInput}
+            onChange={(e) => setPasswordInput(e.target.value)}
+            className="border border-line bg-bg2 px-3 py-2.5 text-center text-sm text-cream placeholder:text-dim focus:outline focus:outline-1 focus:outline-accent"
+          />
+          <button
+            type="submit"
+            disabled={unlocking}
+            className="cursor-pointer border-none bg-accent px-5 py-2.5 font-display text-sm font-black tracking-[0.1em] text-bg hover:bg-accent-hover disabled:opacity-60"
+          >
+            {unlocking ? "…" : "UNLOCK"}
+          </button>
+          {unlockError && <div className="text-center text-xs tracking-wide text-accent">{unlockError}</div>}
+        </form>
+        <StudioFooter />
+      </Centered>
+    );
+  }
+
   const activeTrack = detail?.tracks.find((t) => t.id === activeTrackId) ?? detail?.tracks[0];
-  const activeVersion = activeTrack && (activeTrack.versions.find((v) => v.active) ?? activeTrack.versions[0]);
+  const selectedVersion =
+    activeTrack &&
+    (activeTrack.versions.find((v) => v.id === selectedVersionByTrack[activeTrack.id]) ??
+      activeTrack.versions.find((v) => v.active) ??
+      activeTrack.versions[0]);
 
   return (
     <div className="mx-auto flex min-h-screen max-w-[720px] flex-col px-6 pb-16 pt-16">
@@ -65,14 +127,31 @@ export function AcceptInvite() {
         <div className="mt-2 text-sm tracking-wide text-muted">{invite.release?.artist}</div>
       </div>
 
-      {token && activeTrack && activeVersion && (
+      {token && activeTrack && selectedVersion && (
         <div className="mb-2">
+          <VersionBar
+            track={activeTrack}
+            selectedVersionId={selectedVersion.id}
+            isOwner={false}
+            onSelect={(versionId) => setSelectedVersionByTrack((s) => ({ ...s, [activeTrack.id]: versionId }))}
+            onUpload={() => {}}
+            onActivate={() => {}}
+            onDelete={() => {}}
+          />
           <Player
             track={activeTrack}
-            streamUrl={api.inviteStreamUrl(token, activeVersion.id)}
-            peaksUrl={api.invitePeaksUrl(token, activeVersion.id)}
+            streamUrl={api.inviteStreamUrl(token, selectedVersion.id)}
+            peaksUrl={api.invitePeaksUrl(token, selectedVersion.id)}
             onFirstPlay={() => api.logAnonymousListen(token, activeTrack.id).catch(() => {})}
           />
+          {detail?.canDownload && selectedVersion.status === "ready" && (
+            <a
+              href={api.inviteDownloadUrl(token, selectedVersion.id)}
+              className="mt-2 inline-block font-mono text-[10px] tracking-[0.1em] text-dim hover:text-accent"
+            >
+              ↓ DOWNLOAD {selectedVersion.label.toUpperCase()}
+            </a>
+          )}
         </div>
       )}
 

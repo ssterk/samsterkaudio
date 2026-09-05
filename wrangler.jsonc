@@ -37,7 +37,10 @@
     ]
   },
   "vars": {
-    "BETTER_AUTH_URL": "https://samsterkaudio.com"
+    "BETTER_AUTH_URL": "https://samsterkaudio.com",
+    // RESEND_API_KEY is a secret (wrangler secret put RESEND_API_KEY), not
+    // a var — without it, auth.ts falls back to logging magic links/codes.
+    "RESEND_FROM": "Pressing <pressing@samsterkaudio.com>"
   },
   "compatibility_flags": [
     "nodejs_compat"

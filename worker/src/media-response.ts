@@ -29,12 +29,15 @@ export async function serveMediaObject(
   key: string,
   rangeHeader: string | null,
   contentTypeFallback = "audio/wav",
+  downloadFilename?: string,
 ): Promise<Response> {
   const head = await env.MEDIA.head(key);
   if (!head) return new Response(JSON.stringify({ error: "file not found" }), { status: 404 });
   const size = head.size;
 
-  const range = parseRange(rangeHeader, size);
+  // Downloads never honor Range — a partial-content "download" would save a
+  // truncated file — so a download request always ignores any Range header.
+  const range = downloadFilename ? null : parseRange(rangeHeader, size);
   const obj = range ? await env.MEDIA.get(key, { range }) : await env.MEDIA.get(key);
   if (!obj || !obj.body) return new Response(JSON.stringify({ error: "file not found" }), { status: 404 });
 
@@ -42,6 +45,9 @@ export async function serveMediaObject(
   headers.set("Accept-Ranges", "bytes");
   headers.set("Content-Type", obj.httpMetadata?.contentType ?? contentTypeFallback);
   headers.set("Cache-Control", "private, max-age=3600");
+  if (downloadFilename) {
+    headers.set("Content-Disposition", `attachment; filename="${downloadFilename.replace(/"/g, "")}"`);
+  }
 
   if (range) {
     headers.set("Content-Range", `bytes ${range.offset}-${range.offset + range.length - 1}/${size}`);
